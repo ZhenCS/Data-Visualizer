@@ -1,6 +1,7 @@
 package actions;
 
 import javafx.application.Platform;
+import javafx.stage.FileChooser;
 import vilij.components.ActionComponent;
 import vilij.components.ConfirmationDialog;
 import vilij.components.Dialog;
@@ -37,6 +38,7 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleSaveRequest() {
         // TODO: NOT A PART OF HW 1
+        initSaveWindow();
     }
 
     @Override
@@ -82,5 +84,13 @@ public final class AppActions implements ActionComponent {
         }
         else if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.NO)) return true;
         return false;
+    }
+
+    private void initSaveWindow(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("TSD File", "*.tsd"));
+        fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+
     }
 }
