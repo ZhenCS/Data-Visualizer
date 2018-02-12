@@ -119,9 +119,8 @@ public final class AppActions implements ActionComponent {
             handleSaveRequest();
             return true;
         }
-        else if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.NO)) return true;
+        else return dialog.getSelectedOption().equals(ConfirmationDialog.Option.NO);
 
-        return false;
     }
 
     private File initSaveWindow(){
@@ -131,8 +130,6 @@ public final class AppActions implements ActionComponent {
         fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
 
-        File saveFile = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
-
-        return saveFile;
+        return fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
     }
 }
