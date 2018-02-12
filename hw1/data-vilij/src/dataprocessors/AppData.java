@@ -1,9 +1,11 @@
 package dataprocessors;
 
+import settings.AppPropertyTypes;
 import ui.AppUI;
 import vilij.components.DataComponent;
 import vilij.components.Dialog;
 import vilij.components.ErrorDialog;
+import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
@@ -29,14 +31,26 @@ public class AppData implements DataComponent {
         // TODO: NOT A PART OF HW 1
     }
 
-    public void loadData(String dataString) {
+    public boolean loadData(String dataString) {
         // TODO for homework 1
         try {
             processor.processString(dataString);
+            return true;
         } catch (Exception e) {
-            ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-            dialog.show("Error", e.getMessage());
+            String error = e.getMessage().split(":")[0];
+
+            if (error.equals(TSDProcessor.InvalidDataNameException.class.getSimpleName())) {
+                ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()), e.getMessage());
+            }
+            if(error.equals(ArrayIndexOutOfBoundsException.class.getSimpleName())){
+                ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
+                            applicationTemplate.manager.getPropertyValue(AppPropertyTypes.FORMAT_ERROR_MSG.name()));
+            }
+
         }
+        return false;
     }
 
     @Override

@@ -6,8 +6,10 @@ functionality within the main workspace. -->
     <property_list>
         <!-- RESOURCE FILES AND FOLDERS -->
         <property name="DATA_RESOURCE_PATH" value="data"/>
+        <property name="GUI_ICONS_RESOURCE_PATH" value="gui.icons"/>
 
         <!-- USER INTERFACE ICON FILES -->
+
         <property name="SCREENSHOT_ICON" value="screenshot.png"/>
 
         <!-- TOOLTIPS FOR BUTTONS -->
@@ -32,6 +34,8 @@ functionality within the main workspace. -->
         <property name="TEXT_AREA" value="text area"/>
         <property name="SPECIFIED_FILE" value=" specified file"/>
 
+        <property name="DISPLAY_BUTTON" value="Display"/>
+        <property name="FORMAT_ERROR_MSG" value="Incorrect format "/>
     </property_list>
     <property_options_list/>
 </properties>

@@ -2,13 +2,22 @@ package actions;
 
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
+
+import ui.AppUI;
 import vilij.components.ActionComponent;
 import vilij.components.ConfirmationDialog;
 import vilij.components.Dialog;
+import vilij.components.ErrorDialog;
+import vilij.propertymanager.PropertyManager;
+import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import static settings.AppPropertyTypes.*;
 
 /**
  * This is the concrete implementation of the action handlers required by the application.
@@ -38,7 +47,22 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleSaveRequest() {
         // TODO: NOT A PART OF HW 1
-        initSaveWindow();
+        File file = initSaveWindow();
+        if(file != null){
+            saveFile(file);
+        }
+    }
+
+    private void saveFile(File file){
+        try {
+            FileWriter writer = new FileWriter(file);
+            writer.write(((AppUI)applicationTemplate.getUIComponent()).getText());
+            writer.close();
+        } catch (IOException e) {
+            ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+            dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_ERROR_TITLE.name()),
+                    applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_ERROR_MSG.name()));
+        }
     }
 
     @Override
@@ -61,6 +85,16 @@ public final class AppActions implements ActionComponent {
         // TODO: NOT A PART OF HW 1
     }
 
+    public boolean handleTextArea(String text){
+        if(text.equals("")){
+            ((AppUI)applicationTemplate.getUIComponent()).disableAppUIButtons(true);
+            return false;
+        }else{
+            ((AppUI)applicationTemplate.getUIComponent()).disableAppUIButtons(false);
+            return true;
+        }
+    }
+
     /**
      * This helper method verifies that the user really wants to save their unsaved work, which they might not want to
      * do. The user will be presented with three options:
@@ -76,21 +110,29 @@ public final class AppActions implements ActionComponent {
     private boolean promptToSave() /*throws IOException*/ {
         // TODO for homework 1
         // TODO remove the placeholder line below after you have implemented this method
+        PropertyManager manager = applicationTemplate.manager;
         ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
-        dialog.show("Save Current Work", "Would you like to save current work?");
+        dialog.show(manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()),
+                manager.getPropertyValue(SAVE_UNSAVED_WORK.name()));
+
         if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)){
             handleSaveRequest();
             return true;
         }
         else if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.NO)) return true;
+
         return false;
     }
 
-    private void initSaveWindow(){
+    private File initSaveWindow(){
+        PropertyManager manager = applicationTemplate.manager;
+        String dataExt = manager.getPropertyValue(DATA_FILE_EXT.name());
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("TSD File", "*.tsd"));
-        fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+        fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
 
+        File saveFile = fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+
+        return saveFile;
     }
 }

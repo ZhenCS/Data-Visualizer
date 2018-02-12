@@ -8,15 +8,26 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import settings.AppPropertyTypes;
+import vilij.propertymanager.PropertyManager;
+import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
+
+import static settings.AppPropertyTypes.*;
+import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
+import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
+import static vilij.settings.PropertyTypes.NEW_ICON;
 
 /**
  * This is the application's user interface implementation.
@@ -26,14 +37,15 @@ import java.util.stream.Stream;
 public final class AppUI extends UITemplate {
 
     /** The application to which this class of actions belongs. */
-    ApplicationTemplate applicationTemplate;
-
+    private ApplicationTemplate applicationTemplate;
+    private static final String SEPARATOR = "/";
     @SuppressWarnings("FieldCanBeLocal")
     private Button                       scrnshotButton; // toolbar button to take a screenshot of the data
     private ScatterChart<Number, Number> chart;          // the chart where data will be displayed
     private Button                       displayButton;  // workspace button to display data on the chart
     private TextArea                     textArea;       // text area for new data input
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
+    private String                       scrnshotPath;
 
     public ScatterChart<Number, Number> getChart() { return chart; }
 
@@ -45,10 +57,21 @@ public final class AppUI extends UITemplate {
     @Override
     protected void setResourcePaths(ApplicationTemplate applicationTemplate) {
         super.setResourcePaths(applicationTemplate);
+
+        PropertyManager manager = applicationTemplate.manager;
+        String iconsPath = SEPARATOR + String.join(SEPARATOR,
+                manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
+                manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
+
+        scrnshotPath = String.join(SEPARATOR, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
     }
+
     @Override
     protected void setToolBar(ApplicationTemplate applicationTemplate) {
         super.setToolBar(applicationTemplate);
+        PropertyManager manager = applicationTemplate.manager;
+        scrnshotButton = setToolbarButton(scrnshotPath, manager.getPropertyValue(SCREENSHOT_TOOLTIP.name()), true);
+        toolBar.getItems().add(scrnshotButton);
     }
 
     @Override
@@ -79,17 +102,32 @@ public final class AppUI extends UITemplate {
 
     private void layout() {
         // TODO for homework 1
-        VBox textBox = new VBox();
-        HBox hBox = new HBox();
+        VBox inputBox = new VBox();
+        HBox displayBox = new HBox();
 
-        textBox.setMaxWidth(200);
+        inputBox.setMaxWidth(200);
+
+
+        initInput();
+        initChart();
+
+        inputBox.getChildren().addAll(textArea, displayButton);
+        displayBox.getChildren().addAll(inputBox, chart);
+        appPane.getChildren().add(displayBox);
+    }
+
+    private void initInput(){
+        hasNewText = false;
 
         textArea = new TextArea();
         textArea.setPrefHeight(100.0);
+        textArea.setOnKeyReleased(e -> hasNewText = ((AppActions)applicationTemplate.getActionComponent()).handleTextArea(textArea.getText()));
 
         displayButton = new Button();
-        displayButton.setText("Display");
+        displayButton.setText(applicationTemplate.manager.getPropertyValue(DISPLAY_BUTTON.name()));
+    }
 
+    private void initChart(){
         double tickCount = 1;
         double lowerBound = 0;
         double upperBoundX = 10;
@@ -100,12 +138,8 @@ public final class AppUI extends UITemplate {
         xAxis.setAutoRanging(true);
         yAxis.setAutoRanging(true);
 
-        chart = new ScatterChart(xAxis, yAxis);
+        chart = new ScatterChart<>(xAxis, yAxis);
         chart.setPrefWidth(800);
-
-        textBox.getChildren().addAll(textArea, displayButton);
-        hBox.getChildren().addAll(textBox, chart);
-        appPane.getChildren().add(hBox);
     }
 
     private void setWorkspaceActions() {
@@ -113,16 +147,24 @@ public final class AppUI extends UITemplate {
     }
 
     private void display(){
-        if(!textArea.getText().equals("")){
+        if(hasNewText){
             applicationTemplate.getDataComponent().clear();
             chart.getData().removeAll(chart.getData());
 
-            ((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText());
-            ((AppData) applicationTemplate.getDataComponent()).displayData();
+            if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText()))
+                ((AppData) applicationTemplate.getDataComponent()).displayData();
 
-            ((AppUI) applicationTemplate.getUIComponent()).newButton.setDisable(false);
-            ((AppUI) applicationTemplate.getUIComponent()).saveButton.setDisable(false);
+            hasNewText = false;
         }
 
+    }
+
+    public String getText(){
+        return textArea.getText();
+    }
+
+    public void disableAppUIButtons(boolean bool){
+        ((AppUI) applicationTemplate.getUIComponent()).newButton.setDisable(bool);
+        ((AppUI) applicationTemplate.getUIComponent()).saveButton.setDisable(bool);
     }
 }
