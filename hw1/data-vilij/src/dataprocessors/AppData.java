@@ -1,14 +1,16 @@
 package dataprocessors;
 
-import settings.AppPropertyTypes;
 import ui.AppUI;
 import vilij.components.DataComponent;
 import vilij.components.Dialog;
 import vilij.components.ErrorDialog;
-import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 
 import java.nio.file.Path;
+
+import static settings.AppPropertyTypes.TEXT_AREA;
+import static vilij.settings.PropertyTypes.LOAD_ERROR_MSG;
+import static vilij.settings.PropertyTypes.LOAD_ERROR_TITLE;
 
 /**
  * This is the concrete application-specific implementation of the data component defined by the Vilij framework.
@@ -41,12 +43,13 @@ public class AppData implements DataComponent {
 
             if (error.equals(TSDProcessor.InvalidDataNameException.class.getSimpleName())) {
                 ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-                dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()), e.getMessage());
+                dialog.show(applicationTemplate.manager.getPropertyValue(LOAD_ERROR_TITLE.name()), e.getMessage());
             }
             if(error.equals(ArrayIndexOutOfBoundsException.class.getSimpleName())){
                 ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-                dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
-                            applicationTemplate.manager.getPropertyValue(AppPropertyTypes.FORMAT_ERROR_MSG.name()));
+                dialog.show(applicationTemplate.manager.getPropertyValue(LOAD_ERROR_TITLE.name()),
+                            applicationTemplate.manager.getPropertyValue(LOAD_ERROR_MSG.name()) +
+                                        applicationTemplate.manager.getPropertyValue(TEXT_AREA.name()));
             }
 
         }

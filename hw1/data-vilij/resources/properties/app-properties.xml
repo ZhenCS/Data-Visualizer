@@ -5,8 +5,9 @@ functionality within the main workspace. -->
 <properties>
     <property_list>
         <!-- RESOURCE FILES AND FOLDERS -->
-        <property name="DATA_RESOURCE_PATH" value="data"/>
-        <property name="GUI_ICONS_RESOURCE_PATH" value="gui.icons"/>
+        <property name="CURRENT_PATH" value="hw1/data-vilij"/>
+        <property name="DATA_RESOURCE_PATH" value="resources/data"/>
+        <property name="GUI_ICONS_RESOURCE_PATH" value="gui/icons"/>
 
         <!-- USER INTERFACE ICON FILES -->
 
@@ -35,7 +36,6 @@ functionality within the main workspace. -->
         <property name="SPECIFIED_FILE" value=" specified file"/>
 
         <property name="DISPLAY_BUTTON" value="Display"/>
-        <property name="FORMAT_ERROR_MSG" value="Incorrect format "/>
     </property_list>
     <property_options_list/>
 </properties>

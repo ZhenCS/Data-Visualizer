@@ -10,6 +10,7 @@ package settings;
 public enum AppPropertyTypes {
 
     /* resource files and folders */
+    CURRENT_PATH,
     DATA_RESOURCE_PATH,
     GUI_ICONS_RESOURCE_PATH,
     /* user interface icon file names */
@@ -17,6 +18,9 @@ public enum AppPropertyTypes {
 
     /* tooltips for user interface buttons */
     SCREENSHOT_TOOLTIP,
+
+    /* warning messages */
+    EXIT_WHILE_RUNNING_WARNING,
 
     /* error messages */
     RESOURCE_SUBDIR_NOT_FOUND,
@@ -32,6 +36,5 @@ public enum AppPropertyTypes {
     DATA_FILE_EXT_DESC,
     TEXT_AREA,
     SPECIFIED_FILE,
-    DISPLAY_BUTTON,
-    FORMAT_ERROR_MSG
+    DISPLAY_BUTTON
 }

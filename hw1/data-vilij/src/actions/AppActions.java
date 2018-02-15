@@ -16,8 +16,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static settings.AppPropertyTypes.*;
+import static vilij.settings.PropertyTypes.CLOSE_LABEL;
 
 /**
  * This is the concrete implementation of the action handlers required by the application.
@@ -73,7 +75,19 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleExitRequest() {
         // TODO for homework 1
-        Platform.exit();
+
+        if(((AppUI)applicationTemplate.getUIComponent()).getHasNewText()){
+            ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
+            dialog.show(applicationTemplate.manager.getPropertyValue(CLOSE_LABEL.name()),
+                    applicationTemplate.manager.getPropertyValue(EXIT_WHILE_RUNNING_WARNING.name()));
+
+            if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)){
+                Platform.exit();
+            }
+        }else{
+            Platform.exit();
+        }
+
     }
 
     @Override
@@ -110,6 +124,7 @@ public final class AppActions implements ActionComponent {
     private boolean promptToSave() /*throws IOException*/ {
         // TODO for homework 1
         // TODO remove the placeholder line below after you have implemented this method
+
         PropertyManager manager = applicationTemplate.manager;
         ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
         dialog.show(manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()),
@@ -125,9 +140,15 @@ public final class AppActions implements ActionComponent {
 
     private File initSaveWindow(){
         PropertyManager manager = applicationTemplate.manager;
+
+        dataFilePath = Paths.get(manager.getPropertyValue(CURRENT_PATH.name()));
+        String dataResourcePath = String.join("/",dataFilePath.toString(), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
+
+
         String dataExt = manager.getPropertyValue(DATA_FILE_EXT.name());
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
+        fileChooser.setInitialDirectory(new File(dataResourcePath));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
 
         return fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
