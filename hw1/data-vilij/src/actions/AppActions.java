@@ -76,7 +76,9 @@ public final class AppActions implements ActionComponent {
     public void handleExitRequest() {
         // TODO for homework 1
 
-        if(((AppUI)applicationTemplate.getUIComponent()).getHasNewText()){
+        Platform.exit();
+
+        /*if(((AppUI)applicationTemplate.getUIComponent()).getHasNewText()){
             ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
             dialog.show(applicationTemplate.manager.getPropertyValue(CLOSE_LABEL.name()),
                     applicationTemplate.manager.getPropertyValue(EXIT_WHILE_RUNNING_WARNING.name()));
@@ -86,7 +88,8 @@ public final class AppActions implements ActionComponent {
             }
         }else{
             Platform.exit();
-        }
+        }*/
+
 
     }
 

@@ -7,6 +7,7 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import vilij.propertymanager.PropertyManager;
@@ -15,8 +16,7 @@ import vilij.templates.UITemplate;
 
 
 import static settings.AppPropertyTypes.*;
-import static vilij.settings.PropertyTypes.GUI_RESOURCE_PATH;
-import static vilij.settings.PropertyTypes.ICONS_RESOURCE_PATH;
+
 
 
 /**
@@ -49,11 +49,9 @@ public final class AppUI extends UITemplate {
         super.setResourcePaths(applicationTemplate);
 
         PropertyManager manager = applicationTemplate.manager;
-        String iconsPath = SEPARATOR + String.join(SEPARATOR,
-                manager.getPropertyValue(GUI_RESOURCE_PATH.name()),
-                manager.getPropertyValue(ICONS_RESOURCE_PATH.name()));
-
-        scrnshotPath = String.join(SEPARATOR, iconsPath, manager.getPropertyValue(SCREENSHOT_ICON.name()));
+        scrnshotPath = SEPARATOR + String.join(SEPARATOR,
+                manager.getPropertyValue(GUI_ICONS_RESOURCE_PATH.name()),
+                manager.getPropertyValue(SCREENSHOT_ICON.name()));
     }
 
     @Override
@@ -92,18 +90,19 @@ public final class AppUI extends UITemplate {
 
     private void layout() {
         // TODO for homework 1
+        workspace = new Pane();
         VBox inputBox = new VBox();
         HBox displayBox = new HBox();
 
         inputBox.setMaxWidth(200);
 
-
         initInput();
         initChart();
 
         inputBox.getChildren().addAll(textArea, displayButton);
-        displayBox.getChildren().addAll(inputBox, chart);
-        appPane.getChildren().add(displayBox);
+        displayBox.getChildren().addAll(inputBox,chart);
+        workspace.getChildren().add(displayBox);
+        appPane.getChildren().add(workspace);
     }
 
     private void initInput(){
@@ -151,6 +150,10 @@ public final class AppUI extends UITemplate {
 
     public String getText(){
         return textArea.getText();
+    }
+
+    public boolean getHasNewText(){
+        return hasNewText;
     }
 
     public void disableAppUIButtons(boolean bool){
