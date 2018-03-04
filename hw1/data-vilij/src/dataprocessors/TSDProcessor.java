@@ -194,8 +194,15 @@ public final class TSDProcessor {
                 if(pair.length != 2 || pair[1].equals("")){
                     hadAnError.set(true);
                     throw new FormatException(i + 1);
+                }else{
+                    try{
+                        Double.parseDouble(pair[0]) ;
+                        Double.parseDouble(pair[1]) ;
+                    }catch(NumberFormatException e){
+                        hadAnError.set(true);
+                        throw new FormatException(i + 1);
+                    }
                 }
-
             }
         }
 

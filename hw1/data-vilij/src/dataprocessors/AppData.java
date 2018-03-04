@@ -1,5 +1,6 @@
 package dataprocessors;
 
+import actions.AppActions;
 import javafx.scene.control.TextArea;
 import settings.AppPropertyTypes;
 import ui.AppUI;
@@ -66,8 +67,8 @@ public class AppData implements DataComponent {
             reader.close();
             ((AppUI)applicationTemplate.getUIComponent()).disableNewButton(false);
 
-            processor.checkForErrors(displayTextArea + bufferTextArea);
-            textArea.setText(displayTextArea);
+            processor.checkForErrors(displayTextArea.trim() + "\n" + bufferTextArea);
+            textArea.setText(displayTextArea.trim());
             if(lineNum > 10){
                 ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
                 dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
@@ -79,6 +80,8 @@ public class AppData implements DataComponent {
                     applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_MSG.name() + AppPropertyTypes.SPECIFIED_FILE.name()));
         } catch (Exception e){
             showCorrectDialog(e);
+            ((AppUI)applicationTemplate.getUIComponent()).disableNewButton(true);
+            ((AppActions)applicationTemplate.getActionComponent()).setDataFilePath(null);
         }
     }
 

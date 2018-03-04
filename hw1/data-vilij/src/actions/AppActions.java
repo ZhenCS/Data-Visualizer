@@ -42,6 +42,10 @@ public final class AppActions implements ActionComponent {
     /** Path to the data file currently active. */
     Path dataFilePath;
 
+    public void setDataFilePath(Path p){
+        dataFilePath = p;
+    }
+
     public AppActions(ApplicationTemplate applicationTemplate) {
         this.applicationTemplate = applicationTemplate;
     }

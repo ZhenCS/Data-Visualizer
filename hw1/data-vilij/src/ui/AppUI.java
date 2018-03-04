@@ -195,7 +195,7 @@ public final class AppUI extends UITemplate {
                 else
                     disableSaveButton(true);
             }else{
-                if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText() + bufferText)) {
+                if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText().trim() + "\n" + bufferText)) {
                     ((AppData) applicationTemplate.getDataComponent()).displayData();
 
                     if(chart.getData().size() > 0)
