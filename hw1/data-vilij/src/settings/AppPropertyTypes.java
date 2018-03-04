@@ -13,6 +13,7 @@ public enum AppPropertyTypes {
     CURRENT_PATH,
     DATA_RESOURCE_PATH,
     GUI_ICONS_RESOURCE_PATH,
+    CHART_CSS_PATH,
     /* user interface icon file names */
     SCREENSHOT_ICON,
 
@@ -24,6 +25,8 @@ public enum AppPropertyTypes {
 
     /* error messages */
     RESOURCE_SUBDIR_NOT_FOUND,
+    SCREENSHOT_ERROR,
+    TOO_MANY_LINES_MSG,
 
     /* application-specific message titles */
     SAVE_UNSAVED_WORK_TITLE,
@@ -36,5 +39,11 @@ public enum AppPropertyTypes {
     DATA_FILE_EXT_DESC,
     TEXT_AREA,
     SPECIFIED_FILE,
-    DISPLAY_BUTTON
+    LEFT_PANE_TITLE,
+    LEFT_PANE_TITLEFONT,
+    LEFT_PANE_TITLESIZE,
+    CHART_TITLE,
+    DISPLAY_BUTTON,
+    READ_ONLY_CHECKBOX,
+    AVERAGE_LINE
 }

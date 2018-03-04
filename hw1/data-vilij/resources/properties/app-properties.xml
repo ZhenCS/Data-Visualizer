@@ -8,6 +8,7 @@ functionality within the main workspace. -->
         <property name="CURRENT_PATH" value="hw1/data-vilij"/>
         <property name="DATA_RESOURCE_PATH" value="resources/data"/>
         <property name="GUI_ICONS_RESOURCE_PATH" value="gui/icons"/>
+        <property name="CHART_CSS_PATH" value="/css/chart.css"/>
 
         <!-- USER INTERFACE ICON FILES -->
 
@@ -22,7 +23,8 @@ functionality within the main workspace. -->
 
         <!-- ERROR MESSAGES -->
         <property name="RESOURCE_SUBDIR_NOT_FOUND" value="Directory not found under resources."/>
-
+        <property name="SCREENSHOT_ERROR" value="Unable to save screenshot."/>
+        <property name="TOO_MANY_LINES_MSG" value="Loaded data consists of %d lines. Showing only the first 10 in the text area."/>
         <!-- APPLICATION-SPECIFIC MESSAGE TITLES -->
         <property name="SAVE_UNSAVED_WORK_TITLE" value="Save Current Work"/>
 
@@ -34,8 +36,13 @@ functionality within the main workspace. -->
         <property name="DATA_FILE_EXT_DESC" value="Tab-Separated Data File"/>
         <property name="TEXT_AREA" value="text area"/>
         <property name="SPECIFIED_FILE" value=" specified file"/>
-
-        <property name="DISPLAY_BUTTON" value="Display"/>
+        <property name="LEFT_PANE_TITLE" value="Data File"/>
+        <property name="LEFT_PANE_TITLEFONT" value="SansSerif"/>
+        <property name="LEFT_PANE_TITLESIZE" value="18"/>
+        <property name="CHART_TITLE" value="Data Visualization"/>
+        <property name="DISPLAY_BUTTON" value="Display Data"/>
+        <property name="READ_ONLY_CHECKBOX" value="Read Only"/>
+        <property name="AVERAGE_LINE" value="Average"/>
     </property_list>
     <property_options_list/>
 </properties>

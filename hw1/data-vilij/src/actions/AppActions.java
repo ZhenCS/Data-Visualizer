@@ -1,6 +1,13 @@
 package actions;
 
+import com.sun.javafx.fxml.builder.JavaFXImageBuilder;
+import dataprocessors.AppData;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.effect.ImageInput;
+import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 
 import ui.AppUI;
@@ -12,6 +19,7 @@ import vilij.propertymanager.PropertyManager;
 import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,36 +49,45 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleNewRequest() {
         // TODO for homework 1
-       if(promptToSave())
+       if(promptToSave()){
+           dataFilePath = null;
            applicationTemplate.getUIComponent().clear();
-
+           ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(null);
+       }
     }
 
     @Override
     public void handleSaveRequest() {
         // TODO: NOT A PART OF HW 1
-        File file = initSaveWindow();
-        if(file != null){
-            saveFile(file);
+        if(dataFilePath == null){
+            File file = initSaveWindow();
+            if(file != null){
+                dataFilePath = file.toPath();
+                applicationTemplate.getDataComponent().saveData(dataFilePath);
+            }else{
+                dataFilePath = null;
+            }
+        }else{
+            applicationTemplate.getDataComponent().saveData(dataFilePath);
         }
-    }
 
-    private void saveFile(File file){
-        try {
-            FileWriter writer = new FileWriter(file);
-            writer.write(((AppUI)applicationTemplate.getUIComponent()).getText());
-            writer.close();
-        } catch (IOException e) {
-            ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-            dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_ERROR_TITLE.name()),
-                    applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_ERROR_MSG.name()));
-        }
+
+
     }
 
     @Override
     public void handleLoadRequest() {
         // TODO: NOT A PART OF HW 1
+        File file = initLoadWindow();
+        if(file != null){
+            dataFilePath = file.toPath();
+            applicationTemplate.getDataComponent().loadData(dataFilePath);
+            ((AppUI)applicationTemplate.getUIComponent()).checkReadOnlyBox();
+        }else{
+            dataFilePath = null;
+        }
     }
+
 
     @Override
     public void handleExitRequest() {
@@ -100,9 +117,40 @@ public final class AppActions implements ActionComponent {
 
     public void handleScreenshotRequest() throws IOException {
         // TODO: NOT A PART OF HW 1
+        WritableImage screenshot = ((AppUI)applicationTemplate.getUIComponent()).getChart().snapshot(new SnapshotParameters(), null);
+
+        File image = initSaveImageWindow();
+
+        if(image != null)
+            ImageIO.write(SwingFXUtils.fromFXImage(screenshot, null), "png", image);
+
     }
 
     public boolean handleTextArea(String text){
+        String bufferTextArea = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
+        if(bufferTextArea != null && !bufferTextArea.equals("")){
+            StringBuilder textArea = new StringBuilder(((AppUI) applicationTemplate.getUIComponent()).getText().trim() + "\n");
+            int lineNums = textArea.toString().split("\n").length;
+
+            if(lineNums < 10){
+                String[] bufferLines = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea().split("\n");
+                int i = 0;
+                while(lineNums < 10 && i < bufferLines.length){
+                    textArea.append(bufferLines[i]).append("\n");
+                    i++;
+                    lineNums ++;
+                }
+                StringBuilder bufferString = new StringBuilder();
+                for(int j = i; j < bufferLines.length; j++){
+                    bufferString.append(bufferLines[j]).append("\n");
+                }
+
+                ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(bufferString.toString().trim());
+                ((AppUI)applicationTemplate.getUIComponent()).getTextArea().setText(textArea.toString().trim());
+
+            }
+        }
+
         if(text.equals("")){
             ((AppUI)applicationTemplate.getUIComponent()).disableAppUIButtons(true);
             return false;
@@ -142,6 +190,30 @@ public final class AppActions implements ActionComponent {
     }
 
     private File initSaveWindow(){
+
+        PropertyManager manager = applicationTemplate.manager;
+        String dataExt = manager.getPropertyValue(DATA_FILE_EXT.name());
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
+
+
+        String dataResourcePath;
+        if(dataFilePath == null){
+            dataFilePath = Paths.get(manager.getPropertyValue(CURRENT_PATH.name()));
+            dataResourcePath = String.join("/",dataFilePath.toString(), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
+        }else{
+            dataResourcePath = dataFilePath.toString();
+        }
+
+
+        fileChooser.setInitialDirectory(new File(dataResourcePath));
+
+        return fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+
+    }
+
+    private File initLoadWindow(){
         PropertyManager manager = applicationTemplate.manager;
 
         dataFilePath = Paths.get(manager.getPropertyValue(CURRENT_PATH.name()));
@@ -150,10 +222,25 @@ public final class AppActions implements ActionComponent {
 
         String dataExt = manager.getPropertyValue(DATA_FILE_EXT.name());
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
+        fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_TOOLTIP.name()));
         fileChooser.setInitialDirectory(new File(dataResourcePath));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
+        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
+
+        return fileChooser.showOpenDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+    }
+
+    private File initSaveImageWindow(){
+
+        PropertyManager manager = applicationTemplate.manager;
+        String dataExt = ".png";
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter( dataExt, dataExt));
+
+        String dataResourcePath = String.join("/",manager.getPropertyValue(CURRENT_PATH.name()), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
+        fileChooser.setInitialDirectory(new File(dataResourcePath));
 
         return fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
+
     }
 }

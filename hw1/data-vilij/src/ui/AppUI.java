@@ -2,18 +2,27 @@ package ui;
 
 import actions.AppActions;
 import dataprocessors.AppData;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import settings.AppPropertyTypes;
+import vilij.components.Dialog;
+import vilij.components.ErrorDialog;
 import vilij.propertymanager.PropertyManager;
+import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
 
+
+import java.io.IOException;
 
 import static settings.AppPropertyTypes.*;
 
@@ -31,13 +40,14 @@ public final class AppUI extends UITemplate {
     private static final String SEPARATOR = "/";
     @SuppressWarnings("FieldCanBeLocal")
     private Button                       scrnshotButton; // toolbar button to take a screenshot of the data
-    private ScatterChart<Number, Number> chart;          // the chart where data will be displayed
+    private LineChart<Number, Number> chart;          // the chart where data will be displayed
     private Button                       displayButton;  // workspace button to display data on the chart
     private TextArea                     textArea;       // text area for new data input
     private boolean                      hasNewText;     // whether or not the text area has any new data since last display
     private String                       scrnshotPath;
+    private CheckBox                     readOnlyCheckBox;
 
-    public ScatterChart<Number, Number> getChart() { return chart; }
+    public LineChart<Number, Number> getChart() { return chart; }
 
     public AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
         super(primaryStage, applicationTemplate);
@@ -70,6 +80,15 @@ public final class AppUI extends UITemplate {
         loadButton.setOnAction(e -> applicationTemplate.getActionComponent().handleLoadRequest());
         exitButton.setOnAction(e -> applicationTemplate.getActionComponent().handleExitRequest());
         printButton.setOnAction(e -> applicationTemplate.getActionComponent().handlePrintRequest());
+        scrnshotButton.setOnAction(e -> {
+            try {
+                ((AppActions)applicationTemplate.getActionComponent()).handleScreenshotRequest();
+            } catch (IOException e1) {
+                ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
+                dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_ERROR_TITLE.name()),
+                        applicationTemplate.manager.getPropertyValue(AppPropertyTypes.SCREENSHOT_ERROR.name()));
+            }
+        });
     }
 
     @Override
@@ -84,55 +103,79 @@ public final class AppUI extends UITemplate {
         textArea.setText("");
         applicationTemplate.getDataComponent().clear();
         chart.getData().removeAll(chart.getData());
-        ((AppUI) applicationTemplate.getUIComponent()).newButton.setDisable(true);
-        ((AppUI) applicationTemplate.getUIComponent()).saveButton.setDisable(true);
+        disableAppUIButtons(true);
     }
 
     private void layout() {
         // TODO for homework 1
-        workspace = new Pane();
-        VBox inputBox = new VBox();
-        HBox displayBox = new HBox();
 
-        inputBox.setMaxWidth(200);
+        PropertyManager manager = applicationTemplate.manager;
 
-        initInput();
-        initChart();
+        String cssPath = manager.getPropertyValue(CHART_CSS_PATH.name());
+        getPrimaryScene().getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
 
-        inputBox.getChildren().addAll(textArea, displayButton);
-        displayBox.getChildren().addAll(inputBox,chart);
-        workspace.getChildren().add(displayBox);
-        appPane.getChildren().add(workspace);
-    }
+        NumberAxis      xAxis   = new NumberAxis();
+        NumberAxis      yAxis   = new NumberAxis();
 
-    private void initInput(){
-        hasNewText = false;
+        chart = new LineChart<>(xAxis, yAxis);
+        chart.setTitle(manager.getPropertyValue(AppPropertyTypes.CHART_TITLE.name()));
+        chart.setHorizontalGridLinesVisible(false);
+        chart.setVerticalGridLinesVisible(false);
+        chart.setVerticalZeroLineVisible(false);
+        chart.setHorizontalZeroLineVisible(false);
+
+
+        VBox leftPanel = new VBox(8);
+        leftPanel.setAlignment(Pos.TOP_CENTER);
+        leftPanel.setPadding(new Insets(10));
+
+        VBox.setVgrow(leftPanel, Priority.ALWAYS);
+        leftPanel.setMaxSize(windowWidth * 0.29, windowHeight * 0.3);
+        leftPanel.setMinSize(windowWidth * 0.29, windowHeight * 0.3);
+
+        Text leftPanelTitle = new Text(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLE.name()));
+        String fontname       = manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLEFONT.name());
+        Double fontsize       = Double.parseDouble(manager.getPropertyValue(AppPropertyTypes.LEFT_PANE_TITLESIZE.name()));
+        leftPanelTitle.setFont(Font.font(fontname, fontsize));
 
         textArea = new TextArea();
-        textArea.setPrefHeight(100.0);
         textArea.setOnKeyReleased(e -> hasNewText = ((AppActions)applicationTemplate.getActionComponent()).handleTextArea(textArea.getText()));
 
-        displayButton = new Button();
-        displayButton.setText(applicationTemplate.manager.getPropertyValue(DISPLAY_BUTTON.name()));
+        HBox processButtonsBox = new HBox();
+        displayButton = new Button(manager.getPropertyValue(AppPropertyTypes.DISPLAY_BUTTON.name()));
+        readOnlyCheckBox = new CheckBox(manager.getPropertyValue(AppPropertyTypes.READ_ONLY_CHECKBOX.name()));
+        HBox.setHgrow(processButtonsBox, Priority.ALWAYS);
+        processButtonsBox.getChildren().addAll(displayButton, readOnlyCheckBox);
+
+
+
+        leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox);
+
+        StackPane rightPanel = new StackPane(chart);
+        rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.69);
+        rightPanel.setMinSize(windowWidth * 0.69, windowHeight * 0.69);
+        StackPane.setAlignment(rightPanel, Pos.CENTER);
+
+        workspace = new HBox(leftPanel, rightPanel);
+        HBox.setHgrow(workspace, Priority.ALWAYS);
+
+        appPane.getChildren().add(workspace);
+        VBox.setVgrow(appPane, Priority.ALWAYS);
+
+
     }
 
-    private void initChart(){
-        double tickCount = 1;
-        double lowerBound = 0;
-        double upperBoundX = 10;
-        double upperBoundY = 10;
-
-        NumberAxis xAxis = new NumberAxis(lowerBound, upperBoundX, tickCount);
-        NumberAxis yAxis = new NumberAxis(lowerBound, upperBoundY, tickCount);
-        xAxis.setAutoRanging(true);
-        yAxis.setAutoRanging(true);
-
-        chart = new ScatterChart<>(xAxis, yAxis);
-        chart.setPrefWidth(800);
-    }
 
     private void setWorkspaceActions() {
         displayButton.setOnAction(e -> display());
+        readOnlyCheckBox.setOnAction(e -> toggleReadOnly());
+    }
+
+    private void toggleReadOnly(){
+        if(readOnlyCheckBox.isSelected())
+            textArea.setDisable(true);
+        else
+            textArea.setDisable(false);
     }
 
     private void display(){
@@ -140,8 +183,28 @@ public final class AppUI extends UITemplate {
             applicationTemplate.getDataComponent().clear();
             chart.getData().removeAll(chart.getData());
 
-            if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText()))
-                ((AppData) applicationTemplate.getDataComponent()).displayData();
+            String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
+
+            if(bufferText == null){
+                if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText())) {
+                    ((AppData) applicationTemplate.getDataComponent()).displayData();
+
+                    if(chart.getData().size() > 0)
+                        disableScreenshotButton(false);
+                }
+                else
+                    disableSaveButton(true);
+            }else{
+                if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText() + bufferText)) {
+                    ((AppData) applicationTemplate.getDataComponent()).displayData();
+
+                    if(chart.getData().size() > 0)
+                        disableScreenshotButton(false);
+                }
+                else
+                    disableSaveButton(true);
+            }
+
 
             hasNewText = false;
         }
@@ -152,12 +215,33 @@ public final class AppUI extends UITemplate {
         return textArea.getText();
     }
 
-    public boolean getHasNewText(){
-        return hasNewText;
+    public TextArea getTextArea(){
+        return textArea;
     }
 
-    public void disableAppUIButtons(boolean bool){
-        ((AppUI) applicationTemplate.getUIComponent()).newButton.setDisable(bool);
-        ((AppUI) applicationTemplate.getUIComponent()).saveButton.setDisable(bool);
+    public void setHasNewText(boolean b){
+        hasNewText = b;
+    }
+
+    public void disableAppUIButtons(boolean b){
+        disableSaveButton(b);
+        disableNewButton(b);
+    }
+
+    public void disableSaveButton(boolean b){
+        ((AppUI) applicationTemplate.getUIComponent()).saveButton.setDisable(b);
+    }
+
+    public void disableNewButton(boolean b){
+        ((AppUI) applicationTemplate.getUIComponent()).newButton.setDisable(b);
+    }
+
+    public void disableScreenshotButton(boolean b){
+        ((AppUI) applicationTemplate.getUIComponent()).scrnshotButton.setDisable(b);
+    }
+
+    public void checkReadOnlyBox(){
+        readOnlyCheckBox.setSelected(true);
+        toggleReadOnly();
     }
 }
