@@ -13,9 +13,13 @@ functionality within the main workspace. -->
         <!-- USER INTERFACE ICON FILES -->
 
         <property name="SCREENSHOT_ICON" value="screenshot.png"/>
+        <property name="RUN_ICON" value="run.png"/>
+        <property name="STOP_ICON" value="stop.png"/>
 
         <!-- TOOLTIPS FOR BUTTONS -->
         <property name="SCREENSHOT_TOOLTIP" value="Screenshot"/> <!-- will print current view of image to a file -->
+        <property name="RUN_TOOLTIP" value="Run"/>
+        <property name="STOP_TOOLTIP" value="Stop"/>
 
         <!-- WARNING MESSAGES -->
         <property name="EXIT_WHILE_RUNNING_WARNING"
@@ -40,7 +44,8 @@ functionality within the main workspace. -->
         <property name="LEFT_PANE_TITLEFONT" value="SansSerif"/>
         <property name="LEFT_PANE_TITLESIZE" value="18"/>
         <property name="CHART_TITLE" value="Data Visualization"/>
-        <property name="DISPLAY_BUTTON" value="Display Data"/>
+        <property name="DONE_BUTTON" value="Display Data"/>
+        <property name="EDIT_BUTTON" value="Edit Data"/>
         <property name="READ_ONLY_CHECKBOX" value="Read Only"/>
         <property name="AVERAGE_LINE" value="Average"/>
     </property_list>

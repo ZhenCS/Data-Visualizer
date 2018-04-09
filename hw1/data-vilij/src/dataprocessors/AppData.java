@@ -12,6 +12,8 @@ import vilij.templates.ApplicationTemplate;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static settings.AppPropertyTypes.AVERAGE_LINE;
 import static settings.AppPropertyTypes.TEXT_AREA;
@@ -49,13 +51,11 @@ public class AppData implements DataComponent {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dataFilePath.toFile()));
             applicationTemplate.getUIComponent().clear();
-            TextArea textArea = ((AppUI)applicationTemplate.getUIComponent()).getTextArea();
             String line;
             String displayTextArea = "";
             bufferTextArea = "";
             int lineNum = 0;
             while((line = reader.readLine()) != null){
-
                 if(lineNum < 10)
                     displayTextArea += line + "\n";
                 else
@@ -63,12 +63,21 @@ public class AppData implements DataComponent {
 
                 lineNum++;
             }
-            ((AppUI)applicationTemplate.getUIComponent()).setHasNewText(true);
             reader.close();
-            ((AppUI)applicationTemplate.getUIComponent()).disableNewButton(false);
-
             processor.checkForErrors(displayTextArea.trim() + "\n" + bufferTextArea);
-            textArea.setText(displayTextArea.trim());
+
+            AppUI ui = ((AppUI)applicationTemplate.getUIComponent());
+
+            ui.getTextArea().setText(displayTextArea.trim());
+            ui.setHasNewText(true);
+            ui.disableNewButton(false);
+            ui.toggleLeftPane(true);
+            ui.doneUIUpdate();
+
+            ui.setMetaDataText(processor.getMetaData(displayTextArea.trim() + "\n" + bufferTextArea,
+                                dataFilePath.getFileName().toString()).build());
+            addClassification();
+
             if(lineNum > 10){
                 ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
                 dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
@@ -80,7 +89,8 @@ public class AppData implements DataComponent {
                     applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_MSG.name() + AppPropertyTypes.SPECIFIED_FILE.name()));
         } catch (Exception e){
             showCorrectDialog(e);
-            ((AppUI)applicationTemplate.getUIComponent()).disableNewButton(true);
+            ((AppUI)applicationTemplate.getUIComponent()).toggleTextArea(false);
+            ((AppUI)applicationTemplate.getUIComponent()).disableNewButton(false);
             ((AppActions)applicationTemplate.getActionComponent()).setDataFilePath(null);
         }
     }
@@ -89,11 +99,23 @@ public class AppData implements DataComponent {
         // TODO for homework 1
         try {
             processor.processString(dataString);
+            ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(processor.getMetaData(dataString).build());
+            addClassification();
+
             return true;
         } catch (Exception e) {
             showCorrectDialog(e);
         }
         return false;
+    }
+
+    private void addClassification(){
+        if(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().getLabelNum() >= 2){
+            ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().remove("Classification");
+            ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().add("Classification");
+        }
+        else
+            ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().remove("Classification");
     }
 
     @Override

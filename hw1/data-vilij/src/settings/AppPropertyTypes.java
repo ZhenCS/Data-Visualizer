@@ -16,9 +16,13 @@ public enum AppPropertyTypes {
     CHART_CSS_PATH,
     /* user interface icon file names */
     SCREENSHOT_ICON,
+    RUN_ICON,
+    STOP_ICON,
 
     /* tooltips for user interface buttons */
     SCREENSHOT_TOOLTIP,
+    RUN_TOOLTIP,
+    STOP_TOOLTIP,
 
     /* warning messages */
     EXIT_WHILE_RUNNING_WARNING,
@@ -43,7 +47,8 @@ public enum AppPropertyTypes {
     LEFT_PANE_TITLEFONT,
     LEFT_PANE_TITLESIZE,
     CHART_TITLE,
-    DISPLAY_BUTTON,
+    DONE_BUTTON,
+    EDIT_BUTTON,
     READ_ONLY_CHECKBOX,
     AVERAGE_LINE
 }

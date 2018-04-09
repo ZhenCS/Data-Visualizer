@@ -7,8 +7,10 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tooltip;
 
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
@@ -47,7 +49,7 @@ public final class TSDProcessor {
         }
     }
 
-    private Map<String, String>  dataLabels;
+    private Map<String, String> dataLabels;
     private Map<String, Point2D> dataPoints;
 
     TSDProcessor() {
@@ -161,8 +163,6 @@ public final class TSDProcessor {
         });
     }
 
-
-
     void clear() {
         dataPoints.clear();
         dataLabels.clear();
@@ -177,6 +177,7 @@ public final class TSDProcessor {
     private boolean checkFormat(String tsdString) throws FormatException{
         AtomicBoolean hadAnError   = new AtomicBoolean(false);
         String[] list = tsdString.split("\n");
+
         for(int i = 0; i < list.length; i++){
 
             String[] line = list[i].split("\t");
@@ -244,5 +245,87 @@ public final class TSDProcessor {
 
         if (errorMessage.length() > 0)
             throw new Exception(errorMessage.toString());
+    }
+
+
+
+    public MetaDataBuilder getMetaData(String tsdString){
+        MetaDataBuilder builder = MetaDataBuilder.getMetaDataBuilder();
+
+        Map<String, String> labels = new HashMap<>();
+        AtomicInteger count = new AtomicInteger(0);
+        Stream.of(tsdString.split("\n"))
+                .map(line -> Arrays.asList(line.split("\t")))
+                .forEach(list -> {
+                    try {
+                        String name = checkedname(list.get(0));
+                        String label = list.get(1);
+
+                        count.incrementAndGet();
+                        if(!labels.containsValue(label))
+                            labels.put(name, label);
+
+                    } catch (InvalidDataNameException e) {
+                    }
+                });
+
+        return builder.setInstanceNum(count.get()).setLabelName(labels);
+    }
+
+    public MetaDataBuilder getMetaData(String tsdString, String source){
+        return getMetaData(tsdString).setSource(source);
+    }
+
+    public static class MetaDataBuilder{
+
+        private int instanceNum;
+        private int labelNum;
+        private Map<String, String> labelNames;
+        private String source;
+
+        private static MetaDataBuilder builder;
+
+        private MetaDataBuilder(){
+
+        }
+        public int getLabelNum(){
+            return labelNum;
+        }
+
+        public static MetaDataBuilder getMetaDataBuilder(){
+            if(builder == null)
+                builder = new MetaDataBuilder();
+
+            return builder;
+        }
+
+        public MetaDataBuilder setInstanceNum(int num){
+            instanceNum = num;
+            return this;
+        }
+
+        public MetaDataBuilder setLabelName(Map<String, String> labels){
+            labelNames = labels;
+            labelNum = labelNames.size();
+            return this;
+        }
+
+        public MetaDataBuilder setSource(String src){
+            source = src;
+            return this;
+        }
+
+        public String build(){
+            String out = instanceNum + " instances with " + labelNum + " labels.";
+
+            if(source != null)
+                out += " Located from " + source + ".\n";
+
+            out += " The labels are:\n";
+            for(String name : labelNames.keySet())
+                out += "- " + labelNames.get(name) + "\n";
+
+            return out;
+        }
     }
 }

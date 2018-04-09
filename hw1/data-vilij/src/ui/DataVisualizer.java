@@ -1,6 +1,8 @@
 package ui;
 
 import actions.AppActions;
+import algorithms.AppAlgorithm;
+import algorithms.AlgorithmComponent;
 import dataprocessors.AppData;
 import javafx.stage.Stage;
 import vilij.templates.ApplicationTemplate;
@@ -15,6 +17,8 @@ import static vilij.settings.InitializationParams.*;
  * @author Ritwik Banerjee
  */
 public final class DataVisualizer extends ApplicationTemplate {
+
+    private AlgorithmComponent algorithmComponent;
 
     @Override
     public void start(Stage primaryStage) {
@@ -36,8 +40,14 @@ public final class DataVisualizer extends ApplicationTemplate {
         setUIComponent(new AppUI(primaryStage, this));
         setActionComponent(new AppActions(this));
         setDataComponent(new AppData(this));
-
+        setAlgorithmComponent(new AppAlgorithm(this));
         uiComponent.initialize();
     }
+
+    private void setAlgorithmComponent(AlgorithmComponent component){
+        algorithmComponent = component;
+    }
+
+    public AlgorithmComponent getAlgorithmComponent() {return algorithmComponent;}
 
 }

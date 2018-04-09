@@ -1,12 +1,10 @@
 package actions;
 
-import com.sun.javafx.fxml.builder.JavaFXImageBuilder;
+
 import dataprocessors.AppData;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.effect.ImageInput;
-import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 
@@ -14,20 +12,18 @@ import ui.AppUI;
 import vilij.components.ActionComponent;
 import vilij.components.ConfirmationDialog;
 import vilij.components.Dialog;
-import vilij.components.ErrorDialog;
 import vilij.propertymanager.PropertyManager;
 import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 
 import javax.imageio.ImageIO;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import static settings.AppPropertyTypes.*;
-import static vilij.settings.PropertyTypes.CLOSE_LABEL;
 
 /**
  * This is the concrete implementation of the action handlers required by the application.
@@ -41,7 +37,6 @@ public final class AppActions implements ActionComponent {
 
     /** Path to the data file currently active. */
     Path dataFilePath;
-
     public void setDataFilePath(Path p){
         dataFilePath = p;
     }
@@ -53,11 +48,22 @@ public final class AppActions implements ActionComponent {
     @Override
     public void handleNewRequest() {
         // TODO for homework 1
-       if(promptToSave()){
-           dataFilePath = null;
-           applicationTemplate.getUIComponent().clear();
-           ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(null);
+
+       if(!((AppUI)applicationTemplate.getUIComponent()).getText().equals("")){
+           if(promptToSave()){
+               dataFilePath = null;
+               applicationTemplate.getUIComponent().clear();
+               ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(null);
+           }
        }
+       AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+       ui.toggleLeftPane(true);
+       ui.setHasNewText(false);
+       ui.disableEditButton(true);
+       ui.disableDoneButton(false);
+       ui.toggleTextArea(false);
+       ui.setMetaDataText("");
+
     }
 
     @Override
@@ -86,7 +92,6 @@ public final class AppActions implements ActionComponent {
         if(file != null){
             dataFilePath = file.toPath();
             applicationTemplate.getDataComponent().loadData(dataFilePath);
-            ((AppUI)applicationTemplate.getUIComponent()).checkReadOnlyBox();
         }else{
             dataFilePath = null;
         }
@@ -132,27 +137,15 @@ public final class AppActions implements ActionComponent {
 
     public boolean handleTextArea(String text){
         String bufferTextArea = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
+
         if(bufferTextArea != null && !bufferTextArea.equals("")){
-            StringBuilder textArea = new StringBuilder(((AppUI) applicationTemplate.getUIComponent()).getText().trim() + "\n");
-            int lineNums = textArea.toString().split("\n").length;
+            String[] textArray = text.split("\n");
 
-            if(lineNums < 10){
-                String[] bufferLines = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea().split("\n");
-                int i = 0;
-                while(lineNums < 10 && i < bufferLines.length){
-                    textArea.append(bufferLines[i]).append("\n");
-                    i++;
-                    lineNums ++;
-                }
-                StringBuilder bufferString = new StringBuilder();
-                for(int j = i; j < bufferLines.length; j++){
-                    bufferString.append(bufferLines[j]).append("\n");
-                }
+            text = Stream.concat(Stream.of(textArray), Stream.of(bufferTextArea.split("\n"))).limit(10).reduce("", (a,b) -> a.concat(b).concat("\n")).trim();
+            bufferTextArea = Stream.of(bufferTextArea.split("\n")).skip(10-textArray.length).reduce("", (a,b) -> a.concat(b).concat("\n")).trim();
 
-                ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(bufferString.toString().trim());
-                ((AppUI)applicationTemplate.getUIComponent()).getTextArea().setText(textArea.toString().trim());
-
-            }
+            ((AppUI)applicationTemplate.getUIComponent()).getTextArea().setText(text.toString().trim());
+            ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(bufferTextArea);
         }
 
         if(text.equals("")){
