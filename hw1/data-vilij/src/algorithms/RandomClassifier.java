@@ -17,11 +17,11 @@ public class RandomClassifier extends Classifier {
     // this mock classifier doesn't actually use the data, but a real classifier will
     private DataSet dataset;
 
-    private final int maxIterations;
-    private final int updateInterval;
+    private int maxIterations;
+    private int updateInterval;
 
     // currently, this value does not change after instantiation
-    private final AtomicBoolean tocontinue;
+    private AtomicBoolean tocontinue;
 
     @Override
     public int getMaxIterations() {
@@ -36,6 +36,21 @@ public class RandomClassifier extends Classifier {
     @Override
     public boolean tocontinue() {
         return tocontinue.get();
+    }
+
+    @Override
+    public void setMaxIterations(int iterations) {
+        maxIterations = iterations;
+    }
+
+    @Override
+    public void setUpdateInterval(int interval) {
+        updateInterval = interval;
+    }
+
+    @Override
+    public void setToContinue(boolean toContinue) {
+        this.tocontinue = new AtomicBoolean(toContinue);
     }
 
     public RandomClassifier(DataSet dataset,

@@ -59,10 +59,7 @@ public final class AppActions implements ActionComponent {
        AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
        ui.toggleLeftPane(true);
        ui.setHasNewText(false);
-       ui.disableEditButton(true);
-       ui.disableDoneButton(false);
-       ui.toggleTextArea(false);
-       ui.setMetaDataText("");
+       ui.editUIUpdate();
 
     }
 

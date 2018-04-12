@@ -3,6 +3,7 @@ package ui;
 import actions.AppActions;
 import algorithms.AppAlgorithm;
 import algorithms.AlgorithmComponent;
+import algorithms.ConfigDialog;
 import dataprocessors.AppData;
 import javafx.stage.Stage;
 import vilij.templates.ApplicationTemplate;
@@ -19,12 +20,16 @@ import static vilij.settings.InitializationParams.*;
 public final class DataVisualizer extends ApplicationTemplate {
 
     private AlgorithmComponent algorithmComponent;
+    private ConfigDialog configDialog = ConfigDialog.getDialog();
 
     @Override
     public void start(Stage primaryStage) {
         dialogsAudit(primaryStage);
-        if (propertyAudit())
+        if (propertyAudit()){
             userInterfaceAudit(primaryStage);
+            configDialog.init(primaryStage);
+        }
+
     }
 
     @Override
@@ -49,5 +54,7 @@ public final class DataVisualizer extends ApplicationTemplate {
     }
 
     public AlgorithmComponent getAlgorithmComponent() {return algorithmComponent;}
+
+    public ConfigDialog getConfigDialog() {return configDialog;}
 
 }

@@ -15,11 +15,13 @@ functionality within the main workspace. -->
         <property name="SCREENSHOT_ICON" value="screenshot.png"/>
         <property name="RUN_ICON" value="run.png"/>
         <property name="STOP_ICON" value="stop.png"/>
+        <property name="CONFIG_ICON" value="config.png"/>
 
         <!-- TOOLTIPS FOR BUTTONS -->
         <property name="SCREENSHOT_TOOLTIP" value="Screenshot"/> <!-- will print current view of image to a file -->
         <property name="RUN_TOOLTIP" value="Run"/>
         <property name="STOP_TOOLTIP" value="Stop"/>
+        <property name="CONFIG_TOOLTIP" value="Configure Algorithm"/>
 
         <!-- WARNING MESSAGES -->
         <property name="EXIT_WHILE_RUNNING_WARNING"
@@ -46,8 +48,11 @@ functionality within the main workspace. -->
         <property name="CHART_TITLE" value="Data Visualization"/>
         <property name="DONE_BUTTON" value="Display Data"/>
         <property name="EDIT_BUTTON" value="Edit Data"/>
-        <property name="READ_ONLY_CHECKBOX" value="Read Only"/>
         <property name="AVERAGE_LINE" value="Average"/>
+        <property name="CONFIG_LABEL" value="Save Configuration"/>
+        <property name="MAX_ITERATIONS_LABEL" value="Max Iterations:"/>
+        <property name="UPDATE_INTERVAL_LABEL" value="Update Interval:"/>
+        <property name="CONFIG_TITLE" value="Configuring:"/>
     </property_list>
     <property_options_list/>
 </properties>
