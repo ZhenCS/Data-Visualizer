@@ -147,9 +147,17 @@ public final class TSDProcessor {
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
         series.setName(averageName);
-        series.getData().add(new XYChart.Data<>(lowerBound, average));
-        series.getData().add(new XYChart.Data<>(upperBound, average));
+
+        XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBound, average);
+        XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBound, average);
+
+
+        series.getData().add(lower);
+        series.getData().add(upper);
         chart.getData().add(series);
+
+        lower.getNode().setVisible(false);
+        upper.getNode().setVisible(false);
 
     }
 
@@ -265,8 +273,7 @@ public final class TSDProcessor {
                         if(!labels.containsValue(label))
                             labels.put(name, label);
 
-                    } catch (InvalidDataNameException e) {
-                    }
+                    } catch (InvalidDataNameException ignored) {}
                 });
 
         return builder.setInstanceNum(count.get()).setLabelName(labels);
@@ -299,33 +306,33 @@ public final class TSDProcessor {
             return builder;
         }
 
-        public MetaDataBuilder setInstanceNum(int num){
+        MetaDataBuilder setInstanceNum(int num){
             instanceNum = num;
             return this;
         }
 
-        public MetaDataBuilder setLabelName(Map<String, String> labels){
+        MetaDataBuilder setLabelName(Map<String, String> labels){
             labelNames = labels;
             labelNum = labelNames.size();
             return this;
         }
 
-        public MetaDataBuilder setSource(String src){
+        MetaDataBuilder setSource(String src){
             source = src;
             return this;
         }
 
         public String build(){
-            String out = instanceNum + " instances with " + labelNum + " labels.";
+            StringBuilder out = new StringBuilder(instanceNum + " instances with " + labelNum + " labels.");
 
             if(source != null)
-                out += " Located from " + source + ".\n";
+                out.append(" Located from ").append(source).append(".\n");
 
-            out += " The labels are:\n";
+            out.append(" The labels are:\n");
             for(String name : labelNames.keySet())
-                out += "- " + labelNames.get(name) + "\n";
+                out.append("- ").append(labelNames.get(name)).append("\n");
 
-            return out;
+            return out.toString();
         }
     }
 }

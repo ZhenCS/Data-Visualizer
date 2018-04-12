@@ -14,6 +14,10 @@ public interface Algorithm extends Runnable {
 
     boolean tocontinue();
 
+    boolean isConfigured();
+
+    void setIsConfigured();
+
     void setMaxIterations(int iterations);
 
     void setUpdateInterval(int interval);

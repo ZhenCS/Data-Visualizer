@@ -1,7 +1,6 @@
 package dataprocessors;
 
 import actions.AppActions;
-import javafx.scene.control.TextArea;
 import settings.AppPropertyTypes;
 import ui.AppUI;
 import vilij.components.DataComponent;
@@ -12,8 +11,7 @@ import vilij.templates.ApplicationTemplate;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.stream.Stream;
+
 
 import static settings.AppPropertyTypes.AVERAGE_LINE;
 import static settings.AppPropertyTypes.TEXT_AREA;
@@ -64,25 +62,23 @@ public class AppData implements DataComponent {
                 lineNum++;
             }
             reader.close();
-            processor.checkForErrors(displayTextArea.trim() + "\n" + bufferTextArea);
+            String allInstances = displayTextArea.trim() + "\n" + bufferTextArea;
+
+            processor.checkForErrors(allInstances);
 
             AppUI ui = ((AppUI)applicationTemplate.getUIComponent());
 
             ui.getTextArea().setText(displayTextArea.trim());
-            ui.setHasNewText(true);
             ui.disableNewButton(false);
             ui.toggleLeftPane(true);
             ui.doneUIUpdate();
-
-            ui.setMetaDataText(processor.getMetaData(displayTextArea.trim() + "\n" + bufferTextArea,
+            ui.setMetaDataText(processor.getMetaData(allInstances,
                                 dataFilePath.getFileName().toString()).build());
             addClassification();
+            clear();
+            loadData(allInstances);
+            displayData();
 
-            if(lineNum > 10){
-                ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
-                dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),
-                        String.format(applicationTemplate.manager.getPropertyValue(AppPropertyTypes.TOO_MANY_LINES_MSG.name()), lineNum));
-            }
         } catch (IOException e) {
             ErrorDialog dialog = (ErrorDialog) applicationTemplate.getDialog(Dialog.DialogType.ERROR);
             dialog.show(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_ERROR_TITLE.name()),

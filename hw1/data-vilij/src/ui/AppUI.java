@@ -3,11 +3,7 @@ package ui;
 import actions.AppActions;
 import algorithms.Algorithm;
 import algorithms.AlgorithmTypes;
-import algorithms.RandomClassifier;
-import com.sun.prism.paint.Color;
 import dataprocessors.AppData;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -16,10 +12,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
 
 import javafx.scene.layout.*;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import settings.AppPropertyTypes;
 import vilij.components.Dialog;
@@ -28,11 +22,8 @@ import vilij.propertymanager.PropertyManager;
 import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
-
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 import static settings.AppPropertyTypes.*;
 
@@ -69,7 +60,7 @@ public final class AppUI extends UITemplate {
 
     public LineChart<Number, Number> getChart() { return chart; }
 
-    public AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
+    AppUI(Stage primaryStage, ApplicationTemplate applicationTemplate) {
         super(primaryStage, applicationTemplate);
         this.applicationTemplate = applicationTemplate;
     }
@@ -206,7 +197,8 @@ public final class AppUI extends UITemplate {
         AnchorPane.setBottomAnchor(runStop, 70.0);
         AnchorPane.setLeftAnchor(runStop, 0.0);
         VBox.setVgrow(algorithmButtons, Priority.ALWAYS);
-        //algorithmButtons.setStyle("-fx-background-color: red");
+        runButton.setVisible(false);
+        stopButton.setVisible(false);
 
         leftPanel.setStyle("-fx-background-color: lightgrey");
         leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, metaDataBox, algorithmBox, algorithmSelection, algorithmButtons);
@@ -232,14 +224,25 @@ public final class AppUI extends UITemplate {
     private void showAlgorithmsOfType(AlgorithmTypes type){
         algorithmSelection.getChildren().clear();
         ToggleGroup aGroup = new ToggleGroup();
-
+        runButton.setDisable(true);
+        runButton.setVisible(false);
         ArrayList<Algorithm> typeList = ((DataVisualizer) applicationTemplate).getAlgorithmComponent().getAlgorithmOfType(type);
         if(typeList != null && typeList.size() > 0)
-            typeList.stream().forEach(algorithm -> {
+            typeList.forEach(algorithm -> {
                 HBox hbox = new HBox();
                 RadioButton radio = new RadioButton(algorithm.getClass().getSimpleName());
                 radio.setToggleGroup(aGroup);
+                radio.setOnAction(event -> {
+                    if(algorithm.isConfigured()){
+                        runButton.setDisable(false);
+                        runButton.setVisible(true);
+                    }else{
+                        runButton.setDisable(true);
+                        runButton.setVisible(false);
+                    }
+                });
                 radio.setStyle("-fx-font-size: 13px");
+
 
                 PropertyManager manager = applicationTemplate.manager;
                 Button config = setToolbarButton(configPath, manager.getPropertyValue(CONFIG_TOOLTIP.name()), false);
@@ -265,21 +268,24 @@ public final class AppUI extends UITemplate {
     }
 
     private void toggleAlgorithm(){
-        applicationTemplate.getDataComponent().clear();
-        chart.getData().removeAll(chart.getData());
+        if(hasNewText) {
+            applicationTemplate.getDataComponent().clear();
+            chart.getData().removeAll(chart.getData());
 
-        String data = textArea.getText().trim();
-        String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
-        if(bufferText != null)
-            data += "\n" + bufferText;
+            String data = textArea.getText().trim();
+            String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
+            if (bufferText != null)
+                data += "\n" + bufferText;
 
-        if(((AppData) applicationTemplate.getDataComponent()).loadData(data)){
-            ((AppData) applicationTemplate.getDataComponent()).displayData();
+            if (((AppData) applicationTemplate.getDataComponent()).loadData(data)) {
+                ((AppData) applicationTemplate.getDataComponent()).displayData();
 
-            doneUIUpdate();
-        }else{
-            setMetaDataText("");
-            disableSaveButton(true);
+                doneUIUpdate();
+            } else {
+                setMetaDataText("");
+                disableSaveButton(true);
+            }
+            hasNewText = false;
         }
     }
 
@@ -287,6 +293,7 @@ public final class AppUI extends UITemplate {
         doneButton.setDisable(true);
         editButton.setDisable(false);
         textArea.setDisable(true);
+
         algorithmTypes.setVisible(true);
         algorithmSelection.setVisible(true);
     }
@@ -295,42 +302,14 @@ public final class AppUI extends UITemplate {
         doneButton.setDisable(false);
         editButton.setDisable(true);
         textArea.setDisable(false);
+
+        runButton.setVisible(false);
+        stopButton.setVisible(false);
         algorithmTypes.setVisible(false);
         algorithmSelection.setVisible(false);
+
         metaData.setText("");
-    }
-
-    private void display(){
-        if(hasNewText){
-            applicationTemplate.getDataComponent().clear();
-            chart.getData().removeAll(chart.getData());
-
-            String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
-
-            if(bufferText == null){
-                if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText())) {
-                    ((AppData) applicationTemplate.getDataComponent()).displayData();
-
-                    if(chart.getData().size() > 0)
-                        disableScreenshotButton(false);
-                }
-                else
-                    disableSaveButton(true);
-            }else{
-                if(((AppData) applicationTemplate.getDataComponent()).loadData(textArea.getText().trim() + "\n" + bufferText)) {
-                    ((AppData) applicationTemplate.getDataComponent()).displayData();
-
-                    if(chart.getData().size() > 0)
-                        disableScreenshotButton(false);
-                }
-                else
-                    disableSaveButton(true);
-            }
-
-
-            hasNewText = false;
-        }
-
+        hasNewText = true;
     }
 
     public void toggleTextArea(boolean b){
@@ -366,13 +345,13 @@ public final class AppUI extends UITemplate {
         scrnshotButton.setDisable(b);
     }
 
-    public void disableDoneButton(boolean b){
+    /*public void disableDoneButton(boolean b){
         doneButton.setDisable(b);
     }
 
     public void disableEditButton(boolean b) {
         editButton.setDisable(b);
-    }
+    }*/
 
     public void toggleLeftPane(boolean b){
         leftPanel.setVisible(b);
@@ -386,7 +365,7 @@ public final class AppUI extends UITemplate {
         return algorithmTypes;
     }
 
-    public void toggleAlgorithmTypes(boolean b){
+    /*public void toggleAlgorithmTypes(boolean b){
         algorithmTypes.setVisible(b);
-    }
+    }*/
 }

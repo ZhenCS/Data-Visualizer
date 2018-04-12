@@ -6,7 +6,6 @@ import ui.DataVisualizer;
 import vilij.templates.ApplicationTemplate;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class AppAlgorithm implements AlgorithmComponent {
 
@@ -18,12 +17,13 @@ public class AppAlgorithm implements AlgorithmComponent {
         algorithmList = new ArrayList<>();
 
         algorithmList.add(new RandomClassifier(new DataSet(), 0,0,false));
+        algorithmList.add(new RandomClassifier(new DataSet(), 1,7,true));
+        algorithmList.add(new RandomClassifier(new DataSet(), 6,2,false));
         algorithmList.add(new RandomCluster(new DataSet(), 0,0,false));
+        algorithmList.add(new RandomCluster(new DataSet(), 2,5,true));
     }
 
-    public void addAlgorithm(Algorithm alg){
-        algorithmList.add(alg);
-    }
+    //public void addAlgorithm(Algorithm alg){algorithmList.add(alg);}
 
     @Override
     public ArrayList<Algorithm> getAlgorithmOfType(AlgorithmTypes type) {
@@ -48,7 +48,7 @@ public class AppAlgorithm implements AlgorithmComponent {
             alg.setMaxIterations(config.getMaxIterations());
             alg.setUpdateInterval(config.getUpdateInterval());
             alg.setToContinue(config.getToContinue());
-
+            alg.setIsConfigured();
             if(alg instanceof Cluster)
                 ((Cluster) alg).setClusterNumber(config.getClusterNumber());
 

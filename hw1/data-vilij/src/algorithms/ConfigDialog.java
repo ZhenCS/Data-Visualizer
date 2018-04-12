@@ -12,12 +12,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import settings.AppPropertyTypes;
 import vilij.propertymanager.PropertyManager;
-import vilij.settings.PropertyTypes;
 
 public class ConfigDialog extends Stage {
 
     public enum Option{
-        YES,NO;
+        YES,NO
     }
 
 
@@ -62,7 +61,7 @@ public class ConfigDialog extends Stage {
         Text text1 = new Text(manager.getPropertyValue(AppPropertyTypes.MAX_ITERATIONS_LABEL.name()));
         StackPane space1 = new StackPane();
         space1.setMinWidth(10);
-        hbox1.setHgrow(space1, Priority.ALWAYS);
+        HBox.setHgrow(space1, Priority.ALWAYS);
         hbox1.setAlignment(Pos.CENTER_LEFT);
         hbox1.getChildren().addAll(text1, space1 ,maxIterationField);
 
@@ -70,7 +69,7 @@ public class ConfigDialog extends Stage {
         Text text2 = new Text(manager.getPropertyValue(AppPropertyTypes.UPDATE_INTERVAL_LABEL.name()));
         StackPane space2 = new StackPane();
         space2.setMinWidth(10);
-        hbox2.setHgrow(space2, Priority.ALWAYS);
+        HBox.setHgrow(space2, Priority.ALWAYS);
         hbox2.setAlignment(Pos.CENTER_LEFT);
         hbox2.getChildren().addAll(text2, space2, updateIntervalField);
 
@@ -78,7 +77,7 @@ public class ConfigDialog extends Stage {
         Text text3 = new Text("Number of Clusters:");
         StackPane space3 = new StackPane();
         space3.setMinWidth(10);
-        clusterNumberHBox.setHgrow(space3, Priority.ALWAYS);
+        HBox.setHgrow(space3, Priority.ALWAYS);
         clusterNumberHBox.setAlignment(Pos.CENTER_LEFT);
         clusterNumberHBox.getChildren().addAll(text3, space3, clusterNumberField);
 
@@ -96,16 +95,23 @@ public class ConfigDialog extends Stage {
     public void show(String configDialogTitle, Algorithm alg) {
         setTitle(configDialogTitle);
         saveOption = Option.NO;
-        maxIterationField.setText("" + alg.getMaxIterations());
-        updateIntervalField.setText("" + alg.getUpdateInterval());
+
+        int text = (alg.getMaxIterations() <= 0) ? 1 : alg.getMaxIterations();
+        maxIterationField.setText("" + text);
+
+        text = (alg.getUpdateInterval() <= 0) ? 1 : alg.getUpdateInterval();
+        updateIntervalField.setText("" + text);
+
         if(alg.tocontinue())
             toContinueBox.setSelected(true);
         else
             toContinueBox.setSelected(false);
 
         if(alg instanceof Cluster){
+
+            text = (((Cluster) alg).getClusterNumber() <= 0) ? 1 : ((Cluster) alg).getClusterNumber();
             clusterNumberHBox.setVisible(true);
-            clusterNumberField.setText("" + ((Cluster) alg).getClusterNumber());
+            clusterNumberField.setText("" + text);
         }
         else{
             clusterNumberHBox.setVisible(false);
@@ -131,7 +137,7 @@ public class ConfigDialog extends Stage {
         try{
             return Integer.parseInt(updateIntervalField.getText());
         }catch (NumberFormatException e){
-            return 0;
+            return 1;
         }
     }
 
@@ -139,7 +145,7 @@ public class ConfigDialog extends Stage {
         try{
             return Integer.parseInt(clusterNumberField.getText());
         }catch (NumberFormatException e){
-            return 0;
+            return 1;
         }
     }
 

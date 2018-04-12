@@ -36,7 +36,7 @@ public final class AppActions implements ActionComponent {
     private ApplicationTemplate applicationTemplate;
 
     /** Path to the data file currently active. */
-    Path dataFilePath;
+    private Path dataFilePath;
     public void setDataFilePath(Path p){
         dataFilePath = p;
     }
@@ -141,7 +141,7 @@ public final class AppActions implements ActionComponent {
             text = Stream.concat(Stream.of(textArray), Stream.of(bufferTextArea.split("\n"))).limit(10).reduce("", (a,b) -> a.concat(b).concat("\n")).trim();
             bufferTextArea = Stream.of(bufferTextArea.split("\n")).skip(10-textArray.length).reduce("", (a,b) -> a.concat(b).concat("\n")).trim();
 
-            ((AppUI)applicationTemplate.getUIComponent()).getTextArea().setText(text.toString().trim());
+            ((AppUI)applicationTemplate.getUIComponent()).getTextArea().setText(text.trim());
             ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(bufferTextArea);
         }
 

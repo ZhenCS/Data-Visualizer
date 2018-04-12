@@ -19,8 +19,14 @@ public abstract class Classifier implements Algorithm {
      * into polynomial curves instead of just straight lines.
      * See 3.4.4 of the SRS.
      */
-    protected List<Integer> output;
+    List<Integer> output;
+    boolean isConfigured;
 
     public List<Integer> getOutput() { return output; }
+
+    @Override
+    public boolean isConfigured() { return isConfigured;}
+    @Override
+    public void setIsConfigured() { isConfigured = true;}
 
 }
