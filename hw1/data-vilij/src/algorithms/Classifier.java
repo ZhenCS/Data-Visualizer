@@ -20,7 +20,7 @@ public abstract class Classifier implements Algorithm {
      * See 3.4.4 of the SRS.
      */
     List<Integer> output;
-    boolean isConfigured;
+    private boolean isConfigured;
 
     public List<Integer> getOutput() { return output; }
 

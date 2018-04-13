@@ -52,6 +52,7 @@ functionality within the main workspace. -->
         <property name="CONFIG_LABEL" value="Save Configuration"/>
         <property name="MAX_ITERATIONS_LABEL" value="Max Iterations:"/>
         <property name="UPDATE_INTERVAL_LABEL" value="Update Interval:"/>
+        <property name="CLUSTER_LABEL" value="Number of Clusters:"/>
         <property name="CONFIG_TITLE" value="Configuring:"/>
     </property_list>
     <property_options_list/>

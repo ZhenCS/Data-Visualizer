@@ -55,5 +55,6 @@ public enum AppPropertyTypes {
     CONFIG_LABEL,
     MAX_ITERATIONS_LABEL,
     UPDATE_INTERVAL_LABEL,
+    CLUSTER_LABEL,
     CONFIG_TITLE
 }

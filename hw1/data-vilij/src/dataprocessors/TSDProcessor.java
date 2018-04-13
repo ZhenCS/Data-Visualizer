@@ -49,8 +49,8 @@ public final class TSDProcessor {
         }
     }
 
-    private Map<String, String> dataLabels;
-    private Map<String, Point2D> dataPoints;
+    private final Map<String, String> dataLabels;
+    private final Map<String, Point2D> dataPoints;
 
     TSDProcessor() {
         dataLabels = new HashMap<>();
@@ -257,9 +257,8 @@ public final class TSDProcessor {
 
 
 
-    public MetaDataBuilder getMetaData(String tsdString){
+    public void setMetaData(String tsdString){
         MetaDataBuilder builder = MetaDataBuilder.getMetaDataBuilder();
-
         Map<String, String> labels = new HashMap<>();
         AtomicInteger count = new AtomicInteger(0);
         Stream.of(tsdString.split("\n"))
@@ -270,17 +269,13 @@ public final class TSDProcessor {
                         String label = list.get(1);
 
                         count.incrementAndGet();
-                        if(!labels.containsValue(label))
+                        if(!labels.containsValue(label) && !label.equals("null"))
                             labels.put(name, label);
 
                     } catch (InvalidDataNameException ignored) {}
                 });
 
-        return builder.setInstanceNum(count.get()).setLabelName(labels);
-    }
-
-    public MetaDataBuilder getMetaData(String tsdString, String source){
-        return getMetaData(tsdString).setSource(source);
+       builder.setInstanceNum(count.get()).setLabelName(labels).setSource(null);
     }
 
     public static class MetaDataBuilder{
@@ -292,18 +287,16 @@ public final class TSDProcessor {
 
         private static MetaDataBuilder builder;
 
-        private MetaDataBuilder(){
-
-        }
-        public int getLabelNum(){
-            return labelNum;
-        }
+        private MetaDataBuilder(){ }
 
         public static MetaDataBuilder getMetaDataBuilder(){
             if(builder == null)
                 builder = new MetaDataBuilder();
-
             return builder;
+        }
+
+        public int getLabelNum(){
+            return labelNum;
         }
 
         MetaDataBuilder setInstanceNum(int num){
@@ -323,10 +316,10 @@ public final class TSDProcessor {
         }
 
         public String build(){
-            StringBuilder out = new StringBuilder(instanceNum + " instances with " + labelNum + " labels.");
+            StringBuilder out = new StringBuilder(instanceNum + " instances with " + labelNum + " label(s).");
 
             if(source != null)
-                out.append(" Located from ").append(source).append(".\n");
+                out.append(" Located from \n ").append(source).append(".\n");
 
             out.append(" The labels are:\n");
             for(String name : labelNames.keySet())

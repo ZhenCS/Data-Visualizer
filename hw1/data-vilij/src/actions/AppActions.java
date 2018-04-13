@@ -33,13 +33,14 @@ import static settings.AppPropertyTypes.*;
 public final class AppActions implements ActionComponent {
 
     /** The application to which this class of actions belongs. */
-    private ApplicationTemplate applicationTemplate;
+    private final ApplicationTemplate applicationTemplate;
 
     /** Path to the data file currently active. */
     private Path dataFilePath;
     public void setDataFilePath(Path p){
         dataFilePath = p;
     }
+    public Path getDataFilePath() {return dataFilePath;}
 
     public AppActions(ApplicationTemplate applicationTemplate) {
         this.applicationTemplate = applicationTemplate;

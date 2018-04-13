@@ -37,7 +37,7 @@ import static settings.AppPropertyTypes.*;
 public final class AppUI extends UITemplate {
 
     /** The application to which this class of actions belongs. */
-    private ApplicationTemplate applicationTemplate;
+    private final ApplicationTemplate applicationTemplate;
     private static final String SEPARATOR = "/";
     @SuppressWarnings("FieldCanBeLocal")
     private Button                      scrnshotButton; // toolbar button to take a screenshot of the data
@@ -197,8 +197,8 @@ public final class AppUI extends UITemplate {
         AnchorPane.setBottomAnchor(runStop, 70.0);
         AnchorPane.setLeftAnchor(runStop, 0.0);
         VBox.setVgrow(algorithmButtons, Priority.ALWAYS);
-        runButton.setVisible(false);
-        stopButton.setVisible(false);
+        setAlgorithmButtons(runButton, false);
+        setAlgorithmButtons(stopButton, false);
 
         leftPanel.setStyle("-fx-background-color: lightgrey");
         leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, metaDataBox, algorithmBox, algorithmSelection, algorithmButtons);
@@ -215,6 +215,17 @@ public final class AppUI extends UITemplate {
         VBox.setVgrow(appPane, Priority.ALWAYS);
 
 
+    }
+
+    private void setAlgorithmButtons(Button button, boolean visible){
+        button.setStyle("-fx-border: none; -fx-background-color: transparent;");
+        setPointerCursor(button);
+        button.setVisible(visible);
+    }
+
+    private void setPointerCursor(Button button){
+        button.setOnMouseEntered(event -> getPrimaryWindow().getScene().setCursor(Cursor.HAND));
+        button.setOnMouseExited(event -> getPrimaryWindow().getScene().setCursor(Cursor.DEFAULT));
     }
 
     public void refreshAlgorithms(){
@@ -235,11 +246,11 @@ public final class AppUI extends UITemplate {
                 radio.setOnAction(event -> {
                     if(algorithm.isConfigured()){
                         runButton.setDisable(false);
-                        runButton.setVisible(true);
                     }else{
                         runButton.setDisable(true);
-                        runButton.setVisible(false);
                     }
+
+                    runButton.setVisible(true);
                 });
                 radio.setStyle("-fx-font-size: 13px");
 
@@ -247,9 +258,7 @@ public final class AppUI extends UITemplate {
                 PropertyManager manager = applicationTemplate.manager;
                 Button config = setToolbarButton(configPath, manager.getPropertyValue(CONFIG_TOOLTIP.name()), false);
                 config.setOnAction(e -> ((DataVisualizer) applicationTemplate).getAlgorithmComponent().configAlgorithm(algorithm));
-                config.setStyle("-fx-border: none; -fx-background-color: transparent;");
-                config.setOnMouseEntered(event -> getPrimaryWindow().getScene().setCursor(Cursor.HAND));
-                config.setOnMouseExited(event -> getPrimaryWindow().getScene().setCursor(Cursor.DEFAULT));
+                setAlgorithmButtons(config, true);
 
                 final StackPane space = new StackPane();
                 HBox.setHgrow(space, Priority.ALWAYS);
@@ -284,8 +293,8 @@ public final class AppUI extends UITemplate {
             } else {
                 setMetaDataText("");
                 disableSaveButton(true);
+                hasNewText = false;
             }
-            hasNewText = false;
         }
     }
 
@@ -293,6 +302,7 @@ public final class AppUI extends UITemplate {
         doneButton.setDisable(true);
         editButton.setDisable(false);
         textArea.setDisable(true);
+        scrnshotButton.setDisable(false);
 
         algorithmTypes.setVisible(true);
         algorithmSelection.setVisible(true);

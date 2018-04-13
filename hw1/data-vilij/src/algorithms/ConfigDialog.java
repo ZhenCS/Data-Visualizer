@@ -21,11 +21,11 @@ public class ConfigDialog extends Stage {
 
 
     private static ConfigDialog dialog;
-    private TextField maxIterationField;
-    private TextField updateIntervalField;
-    private TextField clusterNumberField;
-    private CheckBox toContinueBox;
-    private HBox clusterNumberHBox;
+    private final TextField maxIterationField;
+    private final TextField updateIntervalField;
+    private final TextField clusterNumberField;
+    private final CheckBox toContinueBox;
+    private final HBox clusterNumberHBox;
     private Option saveOption;
 
     private ConfigDialog() {
@@ -74,7 +74,7 @@ public class ConfigDialog extends Stage {
         hbox2.getChildren().addAll(text2, space2, updateIntervalField);
 
 
-        Text text3 = new Text("Number of Clusters:");
+        Text text3 = new Text(manager.getPropertyValue(AppPropertyTypes.CLUSTER_LABEL.name()));
         StackPane space3 = new StackPane();
         space3.setMinWidth(10);
         HBox.setHgrow(space3, Priority.ALWAYS);

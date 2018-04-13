@@ -4,8 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RandomCluster extends Cluster {
 
-    private DataSet dataset;
-
     private int maxIterations;
     private int updateInterval;
 
@@ -16,7 +14,7 @@ public class RandomCluster extends Cluster {
                             int maxIterations,
                             int updateInterval,
                             boolean toContinue) {
-        this.dataset = dataset;
+        DataSet dataset1 = dataset;
         this.maxIterations = maxIterations;
         this.updateInterval = updateInterval;
         tocontinue = new AtomicBoolean(toContinue);

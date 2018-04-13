@@ -11,6 +11,7 @@ import vilij.templates.ApplicationTemplate;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 import static settings.AppPropertyTypes.AVERAGE_LINE;
@@ -26,8 +27,8 @@ import static vilij.settings.PropertyTypes.LOAD_ERROR_TITLE;
  */
 public class AppData implements DataComponent {
 
-    private TSDProcessor        processor;
-    private ApplicationTemplate applicationTemplate;
+    private final TSDProcessor        processor;
+    private final ApplicationTemplate applicationTemplate;
     private String bufferTextArea;
 
     public AppData(ApplicationTemplate applicationTemplate) {
@@ -50,33 +51,39 @@ public class AppData implements DataComponent {
             BufferedReader reader = new BufferedReader(new FileReader(dataFilePath.toFile()));
             applicationTemplate.getUIComponent().clear();
             String line;
-            String displayTextArea = "";
+            String displayTextArea;
             bufferTextArea = "";
             int lineNum = 0;
+            StringBuilder displayTextAreaBuilder = new StringBuilder();
+            StringBuilder bufferTextAreaBuilder = new StringBuilder();
             while((line = reader.readLine()) != null){
                 if(lineNum < 10)
-                    displayTextArea += line + "\n";
+                    displayTextAreaBuilder.append(line).append("\n");
                 else
-                     bufferTextArea += line + "\n";
+                    bufferTextAreaBuilder.append(line).append("\n");
 
                 lineNum++;
             }
+            displayTextArea = displayTextAreaBuilder.toString();
+            bufferTextArea = bufferTextAreaBuilder.toString();
+
             reader.close();
             String allInstances = displayTextArea.trim() + "\n" + bufferTextArea;
 
             processor.checkForErrors(allInstances);
+            clear();
 
             AppUI ui = ((AppUI)applicationTemplate.getUIComponent());
 
             ui.getTextArea().setText(displayTextArea.trim());
             ui.disableNewButton(false);
             ui.toggleLeftPane(true);
-            ui.doneUIUpdate();
-            ui.setMetaDataText(processor.getMetaData(allInstances,
-                                dataFilePath.getFileName().toString()).build());
+
             addClassification();
-            clear();
             loadData(allInstances);
+
+            ui.doneUIUpdate();
+
             displayData();
 
         } catch (IOException e) {
@@ -95,7 +102,13 @@ public class AppData implements DataComponent {
         // TODO for homework 1
         try {
             processor.processString(dataString);
-            ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(processor.getMetaData(dataString).build());
+            Path dataFilePath = ((AppActions)applicationTemplate.getActionComponent()).getDataFilePath();
+            processor.setMetaData(dataString);
+            if(dataFilePath != null){
+                Path p = Paths.get(System.getProperty("user.dir"));
+                TSDProcessor.MetaDataBuilder.getMetaDataBuilder().setSource(p.relativize(dataFilePath).toString());
+            }
+            ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().build());
             addClassification();
 
             return true;

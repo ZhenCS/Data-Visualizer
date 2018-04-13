@@ -3,9 +3,9 @@ package algorithms;
 import java.util.List;
 
 public abstract class Cluster implements Algorithm{
-    List<Integer> output;
-    int clusterNumber;
-    boolean isConfigured;
+    private List<Integer> output;
+    private int clusterNumber;
+    private boolean isConfigured;
 
     public List<Integer> getOutput() { return output; }
 

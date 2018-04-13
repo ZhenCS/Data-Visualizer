@@ -20,7 +20,7 @@ import static vilij.settings.InitializationParams.*;
 public final class DataVisualizer extends ApplicationTemplate {
 
     private AlgorithmComponent algorithmComponent;
-    private ConfigDialog configDialog = ConfigDialog.getDialog();
+    private final ConfigDialog configDialog = ConfigDialog.getDialog();
 
     @Override
     public void start(Stage primaryStage) {
