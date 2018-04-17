@@ -7,6 +7,7 @@ public abstract class Cluster implements Algorithm{
     private int clusterNumber;
     private boolean isConfigured;
 
+
     public List<Integer> getOutput() { return output; }
 
     public void setClusterNumber(int num) {clusterNumber = num;}

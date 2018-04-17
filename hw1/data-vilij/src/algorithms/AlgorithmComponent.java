@@ -8,4 +8,6 @@ public interface AlgorithmComponent {
 
     void configAlgorithm(Algorithm alg);
 
+    void run(Algorithm alg);
+
 }

@@ -51,6 +51,26 @@ public class RandomCluster extends Cluster {
     }
 
     @Override
+    public void setDataSet(DataSet set) {
+
+    }
+
+    @Override
+    public DataSet getDataSet() {
+        return null;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return false;
+    }
+
+    @Override
+    public void setIsRunning(boolean isRunning) {
+
+    }
+
+    @Override
     public void run() {
 
     }

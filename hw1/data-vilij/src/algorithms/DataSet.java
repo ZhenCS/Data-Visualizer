@@ -5,9 +5,11 @@ import javafx.geometry.Point2D;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 /**
  * This class specifies how an algorithm will expect the dataset to be. It is
@@ -74,9 +76,23 @@ public class DataSet {
             try {
                 dataset.addInstance(line);
             } catch (InvalidDataNameException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         });
+        return dataset;
+    }
+
+    public static DataSet fromTSDString(String tsdString){
+        DataSet dataset = new DataSet();
+
+        Stream.of(tsdString.split("\n")).forEach(line -> {
+            try {
+                dataset.addInstance(line);
+            } catch (InvalidDataNameException e) {
+                //e.printStackTrace();
+            }
+        });
+
         return dataset;
     }
 }

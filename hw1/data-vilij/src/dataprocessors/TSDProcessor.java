@@ -124,19 +124,32 @@ public final class TSDProcessor {
         }
     }
 
+    public void createLine(XYChart<Number, Number> chart, String averageName, List<Integer> output){
+        double lowerBound = dataPoints.values().stream().mapToDouble(Point2D::getX).min().getAsDouble();
+        double upperBound = dataPoints.values().stream().mapToDouble(Point2D::getX).max().getAsDouble();
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName(averageName);
+
+        double lowerBoundY = output.get(0) * lowerBound + output.get(2);
+        double upperBoundY = output.get(0) * upperBound + output.get(2);
+
+        XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBound, lowerBoundY);
+        XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBound, upperBoundY);
+
+        series.getData().add(lower);
+        series.getData().add(upper);
+        chart.getData().add(series);
+
+        //lower.getNode().setVisible(false);
+        //upper.getNode().setVisible(false);
+    }
+
     public void createAverageLine(XYChart<Number, Number> chart, String averageName) {
-
-        double sum;
         int count = dataPoints.size();
-
-
-        //sum = Stream.of(chart.getData()).flatMap(List::stream).map(series -> series.getData()).flatMap(List::stream).mapToDouble(data -> data.getYValue().doubleValue()).sum();
-        //count = Stream.of(chart.getData()).flatMap(List::stream).map(series -> series.getData()).flatMap(List::stream).count();
-
-        sum = dataPoints.values().stream().mapToDouble(Point2D::getY).sum();
+        double sum = dataPoints.values().stream().mapToDouble(Point2D::getY).sum();
 
         double average = sum/count;
-
         double lowerBound = dataPoints.values().stream().mapToDouble(Point2D::getX).min().getAsDouble();
         double upperBound = dataPoints.values().stream().mapToDouble(Point2D::getX).max().getAsDouble();
 
@@ -151,7 +164,6 @@ public final class TSDProcessor {
         XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBound, average);
         XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBound, average);
 
-
         series.getData().add(lower);
         series.getData().add(upper);
         chart.getData().add(series);
@@ -162,7 +174,6 @@ public final class TSDProcessor {
     }
 
     public void createTooltips(LineChart<Number, Number> chart) {
-
         chart.getData().stream().map(XYChart.Series::getData).flatMap(List::stream).forEach(data -> {
             Point2D  point = new Point2D(data.getXValue().doubleValue(), data.getYValue().doubleValue());
             dataPoints.entrySet().stream().filter(entry -> entry.getValue().equals(point)).forEach(entry -> Tooltip.install(data.getNode(), new Tooltip(entry.getKey())));
