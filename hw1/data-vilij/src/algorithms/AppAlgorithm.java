@@ -1,5 +1,9 @@
 package algorithms;
 
+import dataprocessors.AppData;
+import javafx.application.Platform;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import settings.AppPropertyTypes;
 import ui.AppUI;
 import ui.DataVisualizer;
@@ -11,12 +15,13 @@ public class AppAlgorithm implements AlgorithmComponent {
 
     private ApplicationTemplate applicationTemplate;
     private ArrayList<Algorithm> algorithmList;
+    private Thread algorithmThread;
 
     public AppAlgorithm(ApplicationTemplate applicationTemplate){
         this.applicationTemplate = applicationTemplate;
         algorithmList = new ArrayList<>();
 
-        algorithmList.add(new RandomClassifier(new DataSet(), 0,0,false));
+        algorithmList.add(new RandomClassifier(new DataSet(), 40,2,true));
         algorithmList.add(new RandomClassifier(new DataSet(), 1,7,true));
         algorithmList.add(new RandomClassifier(new DataSet(), 6,2,false));
         algorithmList.add(new RandomCluster(new DataSet(), 0,0,false));
@@ -55,4 +60,41 @@ public class AppAlgorithm implements AlgorithmComponent {
             ((AppUI) applicationTemplate.getUIComponent()).refreshAlgorithms();
         }
     }
+
+    public void run(Algorithm alg){
+        algorithmThread = new Thread(alg);
+        Service<Void> displayThread = new Service<Void>() {
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        System.out.println("3");
+                        while(alg.isRunning()){
+                            Platform.runLater(() -> {
+                                if(((AppUI) applicationTemplate.getUIComponent()).isDisplayable()){
+                                    ((AppData)applicationTemplate.getDataComponent()).classify(((Classifier)alg).getOutput());
+                                    ((AppData) applicationTemplate.getDataComponent()).displayData();
+                                }
+
+                            });
+                            try{
+                                Thread.sleep(1000);
+                            }catch (InterruptedException e){
+                                return null;
+                            }
+                        }
+                        return null;
+                    }
+                };
+            }
+        };
+
+        algorithmThread.start();
+        displayThread.restart();
+        //TODO show that algorithm is running
+
+    }
+
+    public Thread getAlgorithmThread() { return algorithmThread; }
 }

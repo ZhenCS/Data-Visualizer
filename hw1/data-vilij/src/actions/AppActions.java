@@ -1,6 +1,7 @@
 package actions;
 
 
+import algorithms.AppAlgorithm;
 import dataprocessors.AppData;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -9,6 +10,7 @@ import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 
 import ui.AppUI;
+import ui.DataVisualizer;
 import vilij.components.ActionComponent;
 import vilij.components.ConfirmationDialog;
 import vilij.components.Dialog;
@@ -24,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static settings.AppPropertyTypes.*;
+import static vilij.settings.PropertyTypes.CLOSE_LABEL;
 
 /**
  * This is the concrete implementation of the action handlers required by the application.
@@ -98,21 +101,22 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleExitRequest() {
-        // TODO for homework 1
+        // TODO show popup if user tries to leave and algorithm is still running
 
-        Platform.exit();
-
-        /*if(((AppUI)applicationTemplate.getUIComponent()).getHasNewText()){
+        //Platform.exit();
+        //((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread().isAlive()
+        if(((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread().isAlive()){
             ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
             dialog.show(applicationTemplate.manager.getPropertyValue(CLOSE_LABEL.name()),
                     applicationTemplate.manager.getPropertyValue(EXIT_WHILE_RUNNING_WARNING.name()));
 
             if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)){
+                ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread().interrupt();
                 Platform.exit();
             }
         }else{
             Platform.exit();
-        }*/
+        }
 
 
     }

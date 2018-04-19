@@ -12,9 +12,11 @@ import vilij.templates.ApplicationTemplate;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 
 import static settings.AppPropertyTypes.AVERAGE_LINE;
+import static settings.AppPropertyTypes.CLASSIFIER_LINE;
 import static settings.AppPropertyTypes.TEXT_AREA;
 import static vilij.settings.PropertyTypes.LOAD_ERROR_MSG;
 import static vilij.settings.PropertyTypes.LOAD_ERROR_TITLE;
@@ -81,9 +83,10 @@ public class AppData implements DataComponent {
 
             addClassification();
             loadData(allInstances);
-
+            addClassification();
             ui.doneUIUpdate();
 
+            createAverageLine();
             displayData();
 
         } catch (IOException e) {
@@ -109,7 +112,6 @@ public class AppData implements DataComponent {
                 TSDProcessor.MetaDataBuilder.getMetaDataBuilder().setSource(p.relativize(dataFilePath).toString());
             }
             ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().build());
-            addClassification();
 
             return true;
         } catch (Exception e) {
@@ -118,7 +120,7 @@ public class AppData implements DataComponent {
         return false;
     }
 
-    private void addClassification(){
+    public void addClassification(){
         if(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().getLabelNum() >= 2){
             ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().remove("Classification");
             ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().add("Classification");
@@ -173,9 +175,16 @@ public class AppData implements DataComponent {
         ((AppUI)applicationTemplate.getUIComponent()).disableScreenshotButton(true);
     }
 
-    public void displayData() {
+    public void createAverageLine(){
         processor.createAverageLine(((AppUI) applicationTemplate.getUIComponent()).getChart(), applicationTemplate.manager.getPropertyValue(AVERAGE_LINE.name()));
+    }
+
+    public void displayData() {
         processor.toChartData(((AppUI) applicationTemplate.getUIComponent()).getChart());
         processor.createTooltips(((AppUI) applicationTemplate.getUIComponent()).getChart());
+    }
+
+    public void classify(List<Integer> output){
+        processor.createLine(((AppUI) applicationTemplate.getUIComponent()).getChart(), applicationTemplate.manager.getPropertyValue(CLASSIFIER_LINE.name()), output);
     }
 }

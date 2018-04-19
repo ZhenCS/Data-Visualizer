@@ -49,6 +49,7 @@ functionality within the main workspace. -->
         <property name="DONE_BUTTON" value="Display Data"/>
         <property name="EDIT_BUTTON" value="Edit Data"/>
         <property name="AVERAGE_LINE" value="Average"/>
+        <property name="CLASSIFIER_LINE" value="Classifier"/>
         <property name="CONFIG_LABEL" value="Save Configuration"/>
         <property name="MAX_ITERATIONS_LABEL" value="Max Iterations:"/>
         <property name="UPDATE_INTERVAL_LABEL" value="Update Interval:"/>

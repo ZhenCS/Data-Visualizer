@@ -4,6 +4,7 @@ package dataprocessors;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tooltip;
 
@@ -124,18 +125,22 @@ public final class TSDProcessor {
         }
     }
 
-    public void createLine(XYChart<Number, Number> chart, String averageName, List<Integer> output){
-        double lowerBound = dataPoints.values().stream().mapToDouble(Point2D::getX).min().getAsDouble();
-        double upperBound = dataPoints.values().stream().mapToDouble(Point2D::getX).max().getAsDouble();
+    public void createLine(XYChart<Number, Number> chart, String name, List<Integer> output){
+        double lowerBoundX = dataPoints.values().stream().mapToDouble(Point2D::getX).min().getAsDouble();
+        double upperBoundX = dataPoints.values().stream().mapToDouble(Point2D::getX).max().getAsDouble();
+
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName(averageName);
+        series.setName(name);
 
-        double lowerBoundY = output.get(0) * lowerBound + output.get(2);
-        double upperBoundY = output.get(0) * upperBound + output.get(2);
+        double lowerBoundY = output.get(0) * lowerBoundX + output.get(2);
+        double upperBoundY = output.get(0) * upperBoundX + output.get(2);
 
-        XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBound, lowerBoundY);
-        XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBound, upperBoundY);
+       // double lowerBoundY = (0 - (output.get(0) * lowerBoundX + output.get(2)))/output.get(1);
+        //double upperBoundY = (0 - (output.get(0) * upperBoundX + output.get(2)))/output.get(1);
+
+        XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBoundX, lowerBoundY);
+        XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBoundX, upperBoundY);
 
         series.getData().add(lower);
         series.getData().add(upper);

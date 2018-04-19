@@ -3,6 +3,7 @@ package ui;
 import actions.AppActions;
 import algorithms.Algorithm;
 import algorithms.AlgorithmTypes;
+import algorithms.DataSet;
 import dataprocessors.AppData;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,6 +23,8 @@ import vilij.propertymanager.PropertyManager;
 import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
+
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -56,7 +59,7 @@ public final class AppUI extends UITemplate {
     private VBox                        algorithmSelection;
     private VBox                        leftPanel;
     private Text                        metaData;
-
+    private Algorithm                   selectedAlgorithm;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -144,7 +147,9 @@ public final class AppUI extends UITemplate {
         getPrimaryScene().getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
 
         NumberAxis      xAxis   = new NumberAxis();
-        NumberAxis      yAxis   = new NumberAxis();
+        NumberAxis      yAxis   = new NumberAxis(0, 60, 10);
+        xAxis.setAnimated(false);
+        yAxis.setAnimated(false);
 
         chart = new LineChart<>(xAxis, yAxis);
         chart.setTitle(manager.getPropertyValue(AppPropertyTypes.CHART_TITLE.name()));
@@ -153,6 +158,7 @@ public final class AppUI extends UITemplate {
         chart.setVerticalZeroLineVisible(false);
         chart.setHorizontalZeroLineVisible(false);
 
+        chart.setAnimated(false);
 
         leftPanel = new VBox(8);
         leftPanel.setAlignment(Pos.TOP_CENTER);
@@ -246,8 +252,10 @@ public final class AppUI extends UITemplate {
                 radio.setOnAction(event -> {
                     if(algorithm.isConfigured()){
                         runButton.setDisable(false);
+                        selectedAlgorithm = algorithm;
                     }else{
                         runButton.setDisable(true);
+                        selectedAlgorithm = null;
                     }
 
                     runButton.setVisible(true);
@@ -273,22 +281,33 @@ public final class AppUI extends UITemplate {
     private void setWorkspaceActions() {
         doneButton.setOnAction(e -> toggleAlgorithm());
         editButton.setOnAction(e -> editUIUpdate());
+        //TODO disable edit button when algorithm is running
         algorithmTypes.valueProperty().addListener((observable, oldValue, newValue) -> showAlgorithmsOfType(AlgorithmTypes.valueOf(newValue.toUpperCase())));
+        runButton.setOnAction(event -> {
+            selectedAlgorithm.setDataSet(DataSet.fromTSDString(textArea.getText()));
+            ((DataVisualizer) applicationTemplate).getAlgorithmComponent().run(selectedAlgorithm);
+        });
+        //TODO always show run/stop button when algorithm is running
+    }
+
+    public boolean isDisplayable(){
+        applicationTemplate.getDataComponent().clear();
+        chart.getData().removeAll(chart.getData());
+
+        String data = textArea.getText().trim();
+        String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
+        if (bufferText != null)
+            data += "\n" + bufferText;
+
+        return ((AppData) applicationTemplate.getDataComponent()).loadData(data);
     }
 
     private void toggleAlgorithm(){
         if(hasNewText) {
-            applicationTemplate.getDataComponent().clear();
-            chart.getData().removeAll(chart.getData());
-
-            String data = textArea.getText().trim();
-            String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
-            if (bufferText != null)
-                data += "\n" + bufferText;
-
-            if (((AppData) applicationTemplate.getDataComponent()).loadData(data)) {
+            if (isDisplayable()) {
+                ((AppData) applicationTemplate.getDataComponent()).createAverageLine();
                 ((AppData) applicationTemplate.getDataComponent()).displayData();
-
+                ((AppData) applicationTemplate.getDataComponent()).addClassification();
                 doneUIUpdate();
             } else {
                 setMetaDataText("");
@@ -322,38 +341,30 @@ public final class AppUI extends UITemplate {
         hasNewText = true;
     }
 
-    public void toggleTextArea(boolean b){
-        textArea.setDisable(b);
-    }
+    public void toggleTextArea(boolean b){ textArea.setDisable(b); }
 
-    public String getText(){
-        return textArea.getText();
-    }
+    public String getText(){ return textArea.getText(); }
 
-    public TextArea getTextArea(){
-        return textArea;
-    }
+    public TextArea getTextArea(){ return textArea; }
 
-    public void setHasNewText(boolean b){
-        hasNewText = b;
-    }
+    public void setHasNewText(boolean b){ hasNewText = b; }
 
     public void disableAppUIButtons(boolean b){
         disableSaveButton(b);
         disableNewButton(b);
     }
 
-    public void disableSaveButton(boolean b){
-        saveButton.setDisable(b);
-    }
+    public void disableSaveButton(boolean b){ saveButton.setDisable(b); }
 
-    public void disableNewButton(boolean b){
-        newButton.setDisable(b);
-    }
+    public void disableNewButton(boolean b){ newButton.setDisable(b); }
 
-    public void disableScreenshotButton(boolean b){
-        scrnshotButton.setDisable(b);
-    }
+    public void disableScreenshotButton(boolean b){ scrnshotButton.setDisable(b); }
+
+    public void toggleLeftPane(boolean b){ leftPanel.setVisible(b); }
+
+    public void setMetaDataText(String text){ metaData.setText(text); }
+
+    public ComboBox<String> getAlgorithmTypes(){ return algorithmTypes; }
 
     /*public void disableDoneButton(boolean b){
         doneButton.setDisable(b);
@@ -363,17 +374,6 @@ public final class AppUI extends UITemplate {
         editButton.setDisable(b);
     }*/
 
-    public void toggleLeftPane(boolean b){
-        leftPanel.setVisible(b);
-    }
-
-    public void setMetaDataText(String text){
-        metaData.setText(text);
-    }
-
-    public ComboBox<String> getAlgorithmTypes(){
-        return algorithmTypes;
-    }
 
     /*public void toggleAlgorithmTypes(boolean b){
         algorithmTypes.setVisible(b);
