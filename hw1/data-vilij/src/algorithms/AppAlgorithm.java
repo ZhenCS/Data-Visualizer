@@ -13,9 +13,14 @@ import java.util.ArrayList;
 
 public class AppAlgorithm implements AlgorithmComponent {
 
+    public  Algorithm selectedAlgorithm;
     private ApplicationTemplate applicationTemplate;
     private ArrayList<Algorithm> algorithmList;
     private Thread algorithmThread;
+
+    public void setSelectedAlgorithm(Algorithm selectedAlgorithm) { this.selectedAlgorithm = selectedAlgorithm; }
+
+    public Algorithm getSelectedAlgorithm() { return selectedAlgorithm; }
 
     public AppAlgorithm(ApplicationTemplate applicationTemplate){
         this.applicationTemplate = applicationTemplate;
@@ -69,21 +74,44 @@ public class AppAlgorithm implements AlgorithmComponent {
                 return new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        System.out.println("3");
-                        while(alg.isRunning()){
-                            Platform.runLater(() -> {
-                                if(((AppUI) applicationTemplate.getUIComponent()).isDisplayable()){
-                                    ((AppData)applicationTemplate.getDataComponent()).classify(((Classifier)alg).getOutput());
-                                    ((AppData) applicationTemplate.getDataComponent()).displayData();
+                        System.out.println("service start");
+                        while(algorithmThread.isAlive()){
+                            synchronized ((RandomClassifier) alg) {
+                                while(((RandomClassifier)alg).getEmpty().get()){
+                                    try{
+                                        alg.wait();
+                                    }catch (InterruptedException e) {
+                                        if(((RandomClassifier)alg).getEmpty() == null)
+                                            return null;
+                                    }
                                 }
 
-                            });
+                                Platform.runLater(() -> {
+                                    if (((AppUI) applicationTemplate.getUIComponent()).isDisplayable()) {
+                                        ((AppData) applicationTemplate.getDataComponent()).classify(((Classifier) alg).getOutput());
+                                        ((AppData) applicationTemplate.getDataComponent()).displayData();
+                                    }
+                                });
+
+                                if(alg.tocontinue()){
+                                    ((RandomClassifier)alg).setEmpty(true);
+                                    alg.notifyAll();
+                                }else{
+                                    ((AppUI) applicationTemplate.getUIComponent()).disableRunButton(false);
+                                }
+                            }
                             try{
-                                Thread.sleep(1000);
+                                Thread.sleep(500);
                             }catch (InterruptedException e){
-                                return null;
+                                    return null;
                             }
                         }
+                        System.out.println("ENDED");
+                        Platform.runLater(() -> {
+                            ((AppUI)applicationTemplate.getUIComponent()).getEditButton().setVisible(true);
+                            ((AppUI)applicationTemplate.getUIComponent()).displayRunButton();
+                        });
+
                         return null;
                     }
                 };
@@ -92,9 +120,14 @@ public class AppAlgorithm implements AlgorithmComponent {
 
         algorithmThread.start();
         displayThread.restart();
-        //TODO show that algorithm is running
 
     }
 
     public Thread getAlgorithmThread() { return algorithmThread; }
+
+    public void endThreads(){
+        ((RandomClassifier)selectedAlgorithm).setEmpty();
+        algorithmThread.interrupt();
+    }
+
 }

@@ -1,9 +1,7 @@
 package ui;
 
 import actions.AppActions;
-import algorithms.Algorithm;
-import algorithms.AlgorithmTypes;
-import algorithms.DataSet;
+import algorithms.*;
 import dataprocessors.AppData;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,7 +22,6 @@ import vilij.settings.PropertyTypes;
 import vilij.templates.ApplicationTemplate;
 import vilij.templates.UITemplate;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -58,8 +55,8 @@ public final class AppUI extends UITemplate {
     private ComboBox<String>            algorithmTypes;
     private VBox                        algorithmSelection;
     private VBox                        leftPanel;
+    private HBox                        runStop;
     private Text                        metaData;
-    private Algorithm                   selectedAlgorithm;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -197,14 +194,16 @@ public final class AppUI extends UITemplate {
         algorithmBox.getChildren().addAll(algorithmTypes/*, algorithm1*/);
 
         AnchorPane algorithmButtons = new AnchorPane();
-        HBox runStop = new HBox();
-        runStop.getChildren().addAll(runButton, stopButton);
+        runStop = new HBox();
+
+        setAlgorithmButtons(runButton, false);
+        setAlgorithmButtons(stopButton, false);
+
+        runStop.getChildren().add(runButton);
         algorithmButtons.getChildren().add(runStop);
         AnchorPane.setBottomAnchor(runStop, 70.0);
         AnchorPane.setLeftAnchor(runStop, 0.0);
         VBox.setVgrow(algorithmButtons, Priority.ALWAYS);
-        setAlgorithmButtons(runButton, false);
-        setAlgorithmButtons(stopButton, false);
 
         leftPanel.setStyle("-fx-background-color: lightgrey");
         leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, metaDataBox, algorithmBox, algorithmSelection, algorithmButtons);
@@ -252,10 +251,10 @@ public final class AppUI extends UITemplate {
                 radio.setOnAction(event -> {
                     if(algorithm.isConfigured()){
                         runButton.setDisable(false);
-                        selectedAlgorithm = algorithm;
+                        ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).setSelectedAlgorithm(algorithm);
                     }else{
                         runButton.setDisable(true);
-                        selectedAlgorithm = null;
+                        ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).setSelectedAlgorithm(null);
                     }
 
                     runButton.setVisible(true);
@@ -281,13 +280,57 @@ public final class AppUI extends UITemplate {
     private void setWorkspaceActions() {
         doneButton.setOnAction(e -> toggleAlgorithm());
         editButton.setOnAction(e -> editUIUpdate());
-        //TODO disable edit button when algorithm is running
         algorithmTypes.valueProperty().addListener((observable, oldValue, newValue) -> showAlgorithmsOfType(AlgorithmTypes.valueOf(newValue.toUpperCase())));
         runButton.setOnAction(event -> {
+            Algorithm selectedAlgorithm = ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getSelectedAlgorithm();
+
             selectedAlgorithm.setDataSet(DataSet.fromTSDString(textArea.getText()));
-            ((DataVisualizer) applicationTemplate).getAlgorithmComponent().run(selectedAlgorithm);
+
+            Thread algorithmThread = ((AppAlgorithm)((DataVisualizer) applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
+
+            ((RandomClassifier) selectedAlgorithm).setEmpty(true);
+            if( algorithmThread == null || !algorithmThread.isAlive()){
+                ((DataVisualizer) applicationTemplate).getAlgorithmComponent().run(selectedAlgorithm);
+            }
+            /*TODO show screenshot button after each iteration + end of algorithm
+                show confirmation dialog when user exits but theres new data*/
+            synchronized (selectedAlgorithm){
+                selectedAlgorithm.notifyAll();
+            }
+
+            editButton.setVisible(false);
+            stopButton.setDisable(false);
+            stopButton.setVisible(true);
+            if(!selectedAlgorithm.getToContinue()){
+                displayNonContinuousButtons();
+                runButton.setDisable(true);
+            }
+            else
+                displayStopButton();
         });
-        //TODO always show run/stop button when algorithm is running
+
+        stopButton.setOnAction(event -> {
+            ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).endThreads();
+
+            editButton.setVisible(true);
+            displayRunButton();
+        });
+    }
+
+    public void displayNonContinuousButtons(){
+        runStop.getChildren().clear();
+        runStop.getChildren().add(runButton);
+        runStop.getChildren().add(stopButton);
+    }
+
+    public void displayRunButton(){
+        runStop.getChildren().clear();
+        runStop.getChildren().add(runButton);
+    }
+
+    public void displayStopButton(){
+        runStop.getChildren().clear();
+        runStop.getChildren().add(stopButton);
     }
 
     public boolean isDisplayable(){
@@ -353,6 +396,7 @@ public final class AppUI extends UITemplate {
         disableSaveButton(b);
         disableNewButton(b);
     }
+    public void disableRunButton(boolean b) { runButton.setDisable(b); }
 
     public void disableSaveButton(boolean b){ saveButton.setDisable(b); }
 
@@ -366,6 +410,7 @@ public final class AppUI extends UITemplate {
 
     public ComboBox<String> getAlgorithmTypes(){ return algorithmTypes; }
 
+    public Button getEditButton() { return editButton; }
     /*public void disableDoneButton(boolean b){
         doneButton.setDisable(b);
     }

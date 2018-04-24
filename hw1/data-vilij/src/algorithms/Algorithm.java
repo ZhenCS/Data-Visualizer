@@ -26,12 +26,8 @@ public interface Algorithm extends Runnable {
 
     void setToContinue(boolean toContinue);
 
+    boolean getToContinue();
+
     void setDataSet(DataSet set);
-
-    DataSet getDataSet();
-
-    boolean isRunning();
-
-    void setIsRunning(boolean isRunning);
 
 }

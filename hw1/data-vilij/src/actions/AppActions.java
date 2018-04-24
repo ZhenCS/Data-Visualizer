@@ -40,19 +40,14 @@ public final class AppActions implements ActionComponent {
 
     /** Path to the data file currently active. */
     private Path dataFilePath;
-    public void setDataFilePath(Path p){
-        dataFilePath = p;
-    }
-    public Path getDataFilePath() {return dataFilePath;}
-
+    public void setDataFilePath(Path p){ dataFilePath = p; }
+    public Path getDataFilePath() { return dataFilePath; }
     public AppActions(ApplicationTemplate applicationTemplate) {
         this.applicationTemplate = applicationTemplate;
     }
 
     @Override
     public void handleNewRequest() {
-        // TODO for homework 1
-
        if(!((AppUI)applicationTemplate.getUIComponent()).getText().equals("")){
            if(promptToSave()){
                dataFilePath = null;
@@ -69,7 +64,6 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleSaveRequest() {
-        // TODO: NOT A PART OF HW 1
         if(dataFilePath == null){
             File file = initSaveWindow();
             if(file != null){
@@ -88,7 +82,6 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleLoadRequest() {
-        // TODO: NOT A PART OF HW 1
         File file = initLoadWindow();
         if(file != null){
             dataFilePath = file.toPath();
@@ -101,17 +94,16 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleExitRequest() {
-        // TODO show popup if user tries to leave and algorithm is still running
+        // TODO show popup if user tries to leave and data is not saved
 
-        //Platform.exit();
-        //((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread().isAlive()
-        if(((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread().isAlive()){
+        Thread algThread = ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
+        if(algThread != null && algThread.isAlive()){
             ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
             dialog.show(applicationTemplate.manager.getPropertyValue(CLOSE_LABEL.name()),
                     applicationTemplate.manager.getPropertyValue(EXIT_WHILE_RUNNING_WARNING.name()));
 
             if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)){
-                ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread().interrupt();
+                ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).endThreads();
                 Platform.exit();
             }
         }else{
@@ -123,11 +115,10 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handlePrintRequest() {
-        // TODO: NOT A PART OF HW 1
+
     }
 
     public void handleScreenshotRequest() throws IOException {
-        // TODO: NOT A PART OF HW 1
         WritableImage screenshot = ((AppUI)applicationTemplate.getUIComponent()).getChart().snapshot(new SnapshotParameters(), null);
 
         File image = initSaveImageWindow();
@@ -172,8 +163,6 @@ public final class AppActions implements ActionComponent {
      * @return <code>false</code> if the user presses the <i>cancel</i>, and <code>true</code> otherwise.
      */
     private boolean promptToSave() /*throws IOException*/ {
-        // TODO for homework 1
-        // TODO remove the placeholder line below after you have implemented this method
 
         PropertyManager manager = applicationTemplate.manager;
         ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);

@@ -28,7 +28,6 @@ public abstract class Classifier implements Algorithm {
     int maxIterations;
     int updateInterval;
     AtomicBoolean tocontinue;
-    AtomicBoolean isRunning;
 
     public List<Integer> getOutput() { return output; }
     @Override
@@ -48,12 +47,8 @@ public abstract class Classifier implements Algorithm {
     @Override
     public void setToContinue(boolean toContinue) { this.tocontinue = new AtomicBoolean(toContinue); }
     @Override
+    public boolean getToContinue() { return tocontinue.get(); }
+    @Override
     public void setDataSet(DataSet set) { dataset = set; }
-    @Override
-    public DataSet getDataSet() { return dataset; }
-    @Override
-    public boolean isRunning() { return isRunning.get(); }
-
-    public void setIsRunning(boolean isRunning) { this.isRunning.set(isRunning); }
 
 }
