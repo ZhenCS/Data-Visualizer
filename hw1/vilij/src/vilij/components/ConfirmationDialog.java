@@ -29,14 +29,14 @@ public class ConfirmationDialog extends Stage implements Dialog {
         YES("Yes"), NO("No"), CANCEL("Cancel");
 
         @SuppressWarnings("unused")
-        private String option;
+        private final String option;
 
         Option(String option) { this.option = option; }
     }
 
     private static ConfirmationDialog dialog;
 
-    private Label confirmationMessage = new Label();
+    private final Label confirmationMessage = new Label();
     private Option selectedOption;
 
     private ConfirmationDialog() { /* empty constructor */ }

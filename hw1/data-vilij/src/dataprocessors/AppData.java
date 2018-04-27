@@ -1,6 +1,7 @@
 package dataprocessors;
 
 import actions.AppActions;
+import javafx.scene.chart.LineChart;
 import settings.AppPropertyTypes;
 import ui.AppUI;
 import vilij.components.DataComponent;
@@ -38,13 +39,9 @@ public class AppData implements DataComponent {
         this.applicationTemplate = applicationTemplate;
     }
 
-    public String getBufferTextArea(){
-        return bufferTextArea;
-    }
+    public String getBufferTextArea(){ return bufferTextArea; }
 
-    public void setBufferTextArea(String text){
-        bufferTextArea = text;
-    }
+    public void setBufferTextArea(String text){ bufferTextArea = text; }
 
     @Override
     public void loadData(Path dataFilePath) {
@@ -80,7 +77,7 @@ public class AppData implements DataComponent {
             ui.getTextArea().setText(displayTextArea.trim());
             ui.disableNewButton(false);
             ui.toggleLeftPane(true);
-
+            ui.setHasNewText(false);
             addClassification();
             loadData(allInstances);
             addClassification();
@@ -101,7 +98,7 @@ public class AppData implements DataComponent {
         }
     }
 
-    public boolean loadData(String dataString) {
+    private boolean loadData(String dataString) {
         // TODO for homework 1
         try {
             processor.processString(dataString);
@@ -112,16 +109,17 @@ public class AppData implements DataComponent {
                 TSDProcessor.MetaDataBuilder.getMetaDataBuilder().setSource(p.relativize(dataFilePath).toString());
             }
             ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().build());
-
             return true;
+
         } catch (Exception e) {
             showCorrectDialog(e);
         }
         return false;
+
     }
 
     public void addClassification(){
-        if(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().getLabelNum() >= 2){
+        if(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().getLabelNum() == 2){
             ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().remove("Classification");
             ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().add("Classification");
         }
@@ -132,7 +130,7 @@ public class AppData implements DataComponent {
     @Override
     public void saveData(Path dataFilePath) {
         // TODO NOT A PART OF HW 1
-        String text = ((AppUI)applicationTemplate.getUIComponent()).getText();
+        String text = getAllDataText();
 
         try {
             processor.checkForErrors(text);
@@ -167,6 +165,24 @@ public class AppData implements DataComponent {
                     applicationTemplate.manager.getPropertyValue(LOAD_ERROR_MSG.name()) +
                             applicationTemplate.manager.getPropertyValue(TEXT_AREA.name()));
         }
+    }
+
+    public boolean hasNoErrors(){
+        clear();
+        LineChart<Number, Number> chart = ((AppUI)applicationTemplate.getUIComponent()).getChart();
+        chart.getData().removeAll(chart.getData());
+
+        String data = getAllDataText();
+
+        return ((AppData) applicationTemplate.getDataComponent()).loadData(data);
+    }
+
+    private String getAllDataText(){
+        String data = ((AppUI)applicationTemplate.getUIComponent()).getText().trim();
+        if (bufferTextArea != null)
+            data += "\n" + bufferTextArea;
+
+        return data;
     }
 
     @Override

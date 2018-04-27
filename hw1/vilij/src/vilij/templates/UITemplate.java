@@ -31,25 +31,25 @@ public class UITemplate implements UIComponent {
 
     protected Pane    workspace;        // the top-level GUI element in the main workspace
     protected ToolBar toolBar;          // the top toolbar
-    protected String  newiconPath;      // path to the 'new' icon
-    protected String  printiconPath;    // path to the 'print' icon
-    protected String  saveiconPath;     // path to the 'save' icon
-    protected String  loadiconPath;     // path to the 'load' icon
-    protected String  exiticonPath;     // path to the 'save' icon
-    protected String  logoPath;         // path to the Vilij logo icon
-    protected String  cssPath;          // path to the CSS file used for stylization of the user interface
-    protected Stage   primaryStage;     // the application window
-    protected Scene   primaryScene;     // the scene graph
+    private String  newiconPath;      // path to the 'new' icon
+    private String  printiconPath;    // path to the 'print' icon
+    private String  saveiconPath;     // path to the 'save' icon
+    private String  loadiconPath;     // path to the 'load' icon
+    private String  exiticonPath;     // path to the 'save' icon
+    private String  logoPath;         // path to the Vilij logo icon
+    private String  cssPath;          // path to the CSS file used for stylization of the user interface
+    private final Stage   primaryStage;     // the application window
+    private Scene   primaryScene;     // the scene graph
     protected Pane    appPane;          // the root node in the scene graph, to organize the containers
     protected Button  newButton;        // button to create new data
     protected Button  saveButton;       // button to save progress on application
     protected Button  loadButton;       // button to load data for the application
     protected Button  exitButton;       // button to exit application
     protected Button  printButton;      // button to print a visualization
-    protected String  applicationTitle; // the application title
-    protected Image   logo;             // the Vilij logo
-    protected int     windowWidth;
-    protected int     windowHeight;
+    private final String  applicationTitle; // the application title
+    private Image   logo;             // the Vilij logo
+    protected final int     windowWidth;
+    protected final int     windowHeight;
 
     /**
      * Creates the minimal user interface to be used by a Vilij application. It uses the window height and width
@@ -127,7 +127,7 @@ public class UITemplate implements UIComponent {
     /** Initialization is not provided at the template-level, and must be implemented by a child class. */
     protected void setToolbarHandlers(ApplicationTemplate applicationTemplate) { /* squelch */ }
 
-    protected void setWindow(ApplicationTemplate applicationTemplate) {
+    private void setWindow(ApplicationTemplate applicationTemplate) {
         primaryStage.setTitle(applicationTitle);
         primaryStage.setResizable(applicationTemplate.manager.getPropertyValueAsBoolean(IS_WINDOW_RESIZABLE.name()));
         appPane = new VBox();

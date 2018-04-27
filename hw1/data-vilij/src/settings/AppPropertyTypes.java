@@ -27,12 +27,12 @@ public enum AppPropertyTypes {
     CONFIG_TOOLTIP,
 
     /* warning messages */
-    EXIT_WHILE_RUNNING_WARNING,
+    CONTINUE_WHILE_RUNNING_WARNING,
+    CONTINUE_LABEL,
 
     /* error messages */
     RESOURCE_SUBDIR_NOT_FOUND,
     SCREENSHOT_ERROR,
-    TOO_MANY_LINES_MSG,
 
     /* application-specific message titles */
     SAVE_UNSAVED_WORK_TITLE,
@@ -52,6 +52,7 @@ public enum AppPropertyTypes {
     DONE_BUTTON,
     EDIT_BUTTON,
     AVERAGE_LINE,
+
     CLASSIFIER_LINE,
     CONFIG_LABEL,
     MAX_ITERATIONS_LABEL,

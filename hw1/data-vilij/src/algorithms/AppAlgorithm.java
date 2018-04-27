@@ -13,24 +13,19 @@ import java.util.ArrayList;
 
 public class AppAlgorithm implements AlgorithmComponent {
 
-    public  Algorithm selectedAlgorithm;
-    private ApplicationTemplate applicationTemplate;
-    private ArrayList<Algorithm> algorithmList;
+    private  Algorithm selectedAlgorithm;
+    private final ApplicationTemplate applicationTemplate;
+    private final ArrayList<Algorithm> algorithmList;
     private Thread algorithmThread;
-
-    public void setSelectedAlgorithm(Algorithm selectedAlgorithm) { this.selectedAlgorithm = selectedAlgorithm; }
-
-    public Algorithm getSelectedAlgorithm() { return selectedAlgorithm; }
 
     public AppAlgorithm(ApplicationTemplate applicationTemplate){
         this.applicationTemplate = applicationTemplate;
         algorithmList = new ArrayList<>();
 
-        algorithmList.add(new RandomClassifier(new DataSet(), 40,2,true));
-        algorithmList.add(new RandomClassifier(new DataSet(), 1,7,true));
-        algorithmList.add(new RandomClassifier(new DataSet(), 6,2,false));
-        algorithmList.add(new RandomCluster(new DataSet(), 0,0,false));
-        algorithmList.add(new RandomCluster(new DataSet(), 2,5,true));
+        algorithmList.add(new RandomClassifier(new DataSet(), 1,1,true));
+        algorithmList.add(new RandomClassifier(new DataSet(), 1,1,true));
+        algorithmList.add(new RandomCluster(new DataSet(), 1,1,false));
+        algorithmList.add(new RandomCluster(new DataSet(), 1,1,true));
     }
 
     //public void addAlgorithm(Algorithm alg){algorithmList.add(alg);}
@@ -73,8 +68,8 @@ public class AppAlgorithm implements AlgorithmComponent {
             protected Task<Void> createTask() {
                 return new Task<Void>() {
                     @Override
-                    protected Void call() throws Exception {
-                        System.out.println("service start");
+                    protected Void call() {
+                        //System.out.println("service start");
                         while(algorithmThread.isAlive()){
                             synchronized ((RandomClassifier) alg) {
                                 while(((RandomClassifier)alg).getEmpty().get()){
@@ -87,7 +82,7 @@ public class AppAlgorithm implements AlgorithmComponent {
                                 }
 
                                 Platform.runLater(() -> {
-                                    if (((AppUI) applicationTemplate.getUIComponent()).isDisplayable()) {
+                                    if (((AppData) applicationTemplate.getDataComponent()).hasNoErrors()) {
                                         ((AppData) applicationTemplate.getDataComponent()).classify(((Classifier) alg).getOutput());
                                         ((AppData) applicationTemplate.getDataComponent()).displayData();
                                     }
@@ -97,7 +92,10 @@ public class AppAlgorithm implements AlgorithmComponent {
                                     ((RandomClassifier)alg).setEmpty(true);
                                     alg.notifyAll();
                                 }else{
-                                    ((AppUI) applicationTemplate.getUIComponent()).disableRunButton(false);
+                                    Platform.runLater(() ->{
+                                        ((AppUI) applicationTemplate.getUIComponent()).disableRunButton(false);
+                                        ((AppUI) applicationTemplate.getUIComponent()).disableScreenshotButton(false);
+                                    });
                                 }
                             }
                             try{
@@ -106,9 +104,10 @@ public class AppAlgorithm implements AlgorithmComponent {
                                     return null;
                             }
                         }
-                        System.out.println("ENDED");
+                        //System.out.println("ENDED");
                         Platform.runLater(() -> {
                             ((AppUI)applicationTemplate.getUIComponent()).getEditButton().setVisible(true);
+                            ((AppUI) applicationTemplate.getUIComponent()).disableScreenshotButton(false);
                             ((AppUI)applicationTemplate.getUIComponent()).displayRunButton();
                         });
 
@@ -117,11 +116,14 @@ public class AppAlgorithm implements AlgorithmComponent {
                 };
             }
         };
-
         algorithmThread.start();
         displayThread.restart();
 
     }
+
+    public void setSelectedAlgorithm(Algorithm selectedAlgorithm) { this.selectedAlgorithm = selectedAlgorithm; }
+
+    public Algorithm getSelectedAlgorithm() { return selectedAlgorithm; }
 
     public Thread getAlgorithmThread() { return algorithmThread; }
 

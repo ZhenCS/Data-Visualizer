@@ -5,7 +5,6 @@ import javafx.geometry.Point2D;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -25,11 +24,11 @@ import java.util.stream.Stream;
  */
 public class DataSet {
 
-    public static class InvalidDataNameException extends Exception {
+    static class InvalidDataNameException extends Exception {
 
         private static final String NAME_ERROR_MSG = "All data instance names must start with the @ character.";
 
-        public InvalidDataNameException(String name) {
+        InvalidDataNameException(String name) {
             super(String.format("Invalid name '%s'." + NAME_ERROR_MSG, name));
         }
     }
@@ -45,8 +44,8 @@ public class DataSet {
         return new Point2D(Double.parseDouble(coordinateStrings[0]), Double.parseDouble(coordinateStrings[1]));
     }
 
-    private Map<String, String>  labels;
-    private Map<String, Point2D> locations;
+    private final Map<String, String>  labels;
+    private final Map<String, Point2D> locations;
 
     /** Creates an empty dataset. */
     public DataSet() {

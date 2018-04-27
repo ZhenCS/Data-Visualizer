@@ -21,7 +21,7 @@ public class ErrorDialog extends Stage implements Dialog {
 
     private static ErrorDialog dialog;
 
-    private Label errorMessage = new Label();
+    private final Label errorMessage = new Label();
 
     private ErrorDialog() {/* empty constructor */ }
 

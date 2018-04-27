@@ -124,28 +124,37 @@ public final class TSDProcessor {
     }
 
     public void createLine(XYChart<Number, Number> chart, String name, List<Integer> output){
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName(name + output.get(3));
+
         double lowerBoundX = dataPoints.values().stream().mapToDouble(Point2D::getX).min().getAsDouble();
         double upperBoundX = dataPoints.values().stream().mapToDouble(Point2D::getX).max().getAsDouble();
+        double upperBoundY = dataPoints.values().stream().mapToDouble(Point2D::getY).max().getAsDouble();
 
 
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName(name);
 
-        double lowerBoundY = output.get(0) * lowerBoundX + output.get(2);
-        double upperBoundY = output.get(0) * upperBoundX + output.get(2);
+        int divisor = output.get(1);
+        if(divisor == 0)
+            divisor = 1;
 
-       // double lowerBoundY = (0 - (output.get(0) * lowerBoundX + output.get(2)))/output.get(1);
-        //double upperBoundY = (0 - (output.get(0) * upperBoundX + output.get(2)))/output.get(1);
+        // (-C -Ax)B
+        double lowerY = (output.get(2) * -1 - output.get(0) * lowerBoundX)/divisor;
+        double upperY = (output.get(2) * -1 - output.get(0) * upperBoundX)/divisor;
 
-        XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBoundX, lowerBoundY);
-        XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBoundX, upperBoundY);
+        if(output.get(0) > 0){
+            lowerY = upperBoundY - Math.abs(lowerY);
+            upperY = upperBoundY - Math.abs(upperY);
+        }
+
+        XYChart.Data<Number, Number> lower = new XYChart.Data<>(lowerBoundX, lowerY);
+        XYChart.Data<Number, Number> upper = new XYChart.Data<>(upperBoundX, upperY);
 
         series.getData().add(lower);
         series.getData().add(upper);
         chart.getData().add(series);
 
-        //lower.getNode().setVisible(false);
-        //upper.getNode().setVisible(false);
+        lower.getNode().setVisible(false);
+        upper.getNode().setVisible(false);
     }
 
     public void createAverageLine(XYChart<Number, Number> chart, String averageName) {

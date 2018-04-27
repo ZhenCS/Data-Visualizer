@@ -34,7 +34,7 @@ import java.util.List;
 public class XMLUtilities {
 
     /** The standard XML schema namespace. It is <b>not</b> the schema itself. */
-    public static final String SCHEMA_STANDARD_SPEC_URL = "http://www.w3.org/2001/XMLSchema";
+    private static final String SCHEMA_STANDARD_SPEC_URL = "http://www.w3.org/2001/XMLSchema";
 
     /** Default constructor */
     public XMLUtilities() {}
@@ -47,7 +47,7 @@ public class XMLUtilities {
      * @param xmlSchemapath the specified XML schema definition file
      * @return <code>true</code> if the file is valid as per the schema, <code>false</code> otherwise.
      */
-    public boolean validateXML(URL xmlFilePath, URL xmlSchemapath) {
+    private boolean validateXML(URL xmlFilePath, URL xmlSchemapath) {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(SCHEMA_STANDARD_SPEC_URL);
         try {
             Schema    schema    = schemaFactory.newSchema(xmlSchemapath);

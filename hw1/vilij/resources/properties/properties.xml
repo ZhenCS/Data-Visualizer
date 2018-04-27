@@ -6,7 +6,7 @@ functionality within the main workspace. -->
     <property_list>
         <!-- HIGH-LEVEL USER INTERFACE PROPERTIES -->
         <property name="WINDOW_WIDTH" value="1000"/>
-        <property name="WINDOW_HEIGHT" value="750"/>
+        <property name="WINDOW_HEIGHT" value="680"/>
         <property name="IS_WINDOW_RESIZABLE" value="false"/>
         <property name="TITLE" value="Visualization Library In Java (Vilij)"/>
 

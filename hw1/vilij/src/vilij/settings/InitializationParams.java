@@ -31,7 +31,7 @@ public enum InitializationParams {
     /** The XML schema definition for the properties files. */
     SCHEMA_DEFINITION("property-schema.xsd");
 
-    private String parameterName;
+    private final String parameterName;
 
     InitializationParams(String parameterName) {
         this.parameterName = parameterName;

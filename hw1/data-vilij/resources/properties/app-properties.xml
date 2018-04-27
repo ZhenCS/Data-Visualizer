@@ -24,13 +24,13 @@ functionality within the main workspace. -->
         <property name="CONFIG_TOOLTIP" value="Configure Algorithm"/>
 
         <!-- WARNING MESSAGES -->
-        <property name="EXIT_WHILE_RUNNING_WARNING"
-                  value="An algorithm is running. If you exit now, all unsaved changes will be lost. Are you sure?"/>
+        <property name="CONTINUE_WHILE_RUNNING_WARNING"
+                  value="An algorithm is running. If you continue, all unsaved changes will be lost. Are you sure?"/>
+        <property name="CONTINUE_LABEL" value="Continue?"/>
 
         <!-- ERROR MESSAGES -->
         <property name="RESOURCE_SUBDIR_NOT_FOUND" value="Directory not found under resources."/>
         <property name="SCREENSHOT_ERROR" value="Unable to save screenshot."/>
-        <property name="TOO_MANY_LINES_MSG" value="Loaded data consists of %d lines. Showing only the first 10 in the text area."/>
         <!-- APPLICATION-SPECIFIC MESSAGE TITLES -->
         <property name="SAVE_UNSAVED_WORK_TITLE" value="Save Current Work"/>
 
@@ -49,6 +49,7 @@ functionality within the main workspace. -->
         <property name="DONE_BUTTON" value="Display Data"/>
         <property name="EDIT_BUTTON" value="Edit Data"/>
         <property name="AVERAGE_LINE" value="Average"/>
+
         <property name="CLASSIFIER_LINE" value="Classifier"/>
         <property name="CONFIG_LABEL" value="Save Configuration"/>
         <property name="MAX_ITERATIONS_LABEL" value="Max Iterations:"/>

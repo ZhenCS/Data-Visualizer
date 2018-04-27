@@ -14,10 +14,10 @@ public class RandomCluster extends Cluster {
                             int maxIterations,
                             int updateInterval,
                             boolean toContinue) {
-        DataSet dataset1 = dataset;
         this.maxIterations = maxIterations;
         this.updateInterval = updateInterval;
         tocontinue = new AtomicBoolean(toContinue);
+        setDataSet(dataset);
     }
 
     @Override

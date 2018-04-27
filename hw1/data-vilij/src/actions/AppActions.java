@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static settings.AppPropertyTypes.*;
-import static vilij.settings.PropertyTypes.CLOSE_LABEL;
 
 /**
  * This is the concrete implementation of the action handlers required by the application.
@@ -48,22 +47,45 @@ public final class AppActions implements ActionComponent {
 
     @Override
     public void handleNewRequest() {
-       if(!((AppUI)applicationTemplate.getUIComponent()).getText().equals("")){
-           if(promptToSave()){
-               dataFilePath = null;
-               applicationTemplate.getUIComponent().clear();
-               ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(null);
-           }
-       }
-       AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
-       ui.toggleLeftPane(true);
-       ui.setHasNewText(false);
-       ui.editUIUpdate();
+        ConfirmationDialog.Option option = handleRunningAlgorithm();
+        Thread algThread = getAlgorithmThread();
+        if(algThread != null && algThread.isAlive()){
+            if(!option.equals(ConfirmationDialog.Option.YES)) return;
+            ((AppAlgorithm) ((DataVisualizer) applicationTemplate).getAlgorithmComponent()).endThreads();
+        }
+
+        if (!((AppUI) applicationTemplate.getUIComponent()).getText().equals("") && ((AppUI)applicationTemplate.getUIComponent()).getHasNewText()) {
+            option = promptToSave();
+            if (option.equals(ConfirmationDialog.Option.CANCEL)) {
+                return;
+            } else if (option.equals(ConfirmationDialog.Option.YES)) {
+                if (((AppData) applicationTemplate.getDataComponent()).hasNoErrors())
+                    handleSaveRequest();
+                else {
+                    ((AppUI) applicationTemplate.getUIComponent()).disableSaveButton(true);
+                    return;
+                }
+            }
+        }
+
+        dataFilePath = null;
+        ((AppData) applicationTemplate.getDataComponent()).setBufferTextArea(null);
+        AppUI ui = ((AppUI) applicationTemplate.getUIComponent());
+        ui.getTextArea().setText("");
+        ui.clear();
+        ui.toggleLeftPane(true);
+        ui.setHasNewText(false);
+        ui.editUIUpdate();
 
     }
 
     @Override
     public void handleSaveRequest() {
+        if(!((AppData)applicationTemplate.getDataComponent()).hasNoErrors()){
+            ((AppUI)applicationTemplate.getUIComponent()).disableSaveButton(true);
+            return;
+        }
+
         if(dataFilePath == null){
             File file = initSaveWindow();
             if(file != null){
@@ -75,42 +97,50 @@ public final class AppActions implements ActionComponent {
         }else{
             applicationTemplate.getDataComponent().saveData(dataFilePath);
         }
-
-
-
     }
 
     @Override
     public void handleLoadRequest() {
+        ConfirmationDialog.Option option = handleRunningAlgorithm();
+        Thread algThread = getAlgorithmThread();
+        if(algThread != null && algThread.isAlive()){
+            if(!option.equals(ConfirmationDialog.Option.YES)) return;
+            ((AppAlgorithm) ((DataVisualizer) applicationTemplate).getAlgorithmComponent()).endThreads();
+        }
+
         File file = initLoadWindow();
         if(file != null){
             dataFilePath = file.toPath();
             applicationTemplate.getDataComponent().loadData(dataFilePath);
-        }else{
-            dataFilePath = null;
-        }
-    }
+        }else{ dataFilePath = null; }
 
+    }
 
     @Override
     public void handleExitRequest() {
-        // TODO show popup if user tries to leave and data is not saved
-
-        Thread algThread = ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
+        ConfirmationDialog.Option option = handleRunningAlgorithm();
+        Thread algThread = getAlgorithmThread();
         if(algThread != null && algThread.isAlive()){
+            if(!option.equals(ConfirmationDialog.Option.YES)) return;
+            ((AppAlgorithm) ((DataVisualizer) applicationTemplate).getAlgorithmComponent()).endThreads();
+        }
+        else if(dataFilePath == null && !((AppUI)applicationTemplate.getUIComponent()).getText().equals("") || ((AppUI)applicationTemplate.getUIComponent()).getHasNewText()){
             ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
-            dialog.show(applicationTemplate.manager.getPropertyValue(CLOSE_LABEL.name()),
-                    applicationTemplate.manager.getPropertyValue(EXIT_WHILE_RUNNING_WARNING.name()));
+            dialog.show(applicationTemplate.manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()),
+                    applicationTemplate.manager.getPropertyValue(SAVE_UNSAVED_WORK.name()));
 
             if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)){
-                ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).endThreads();
-                Platform.exit();
+                if(((AppData)applicationTemplate.getDataComponent()).hasNoErrors()){
+                    handleSaveRequest();
+                    Platform.exit();
+                }else return;
             }
-        }else{
-            Platform.exit();
+            else if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.NO))
+                Platform.exit();
+            else return;
         }
 
-
+        Platform.exit();
     }
 
     @Override
@@ -150,6 +180,23 @@ public final class AppActions implements ActionComponent {
         }
     }
 
+    private Thread getAlgorithmThread(){
+        return ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
+    }
+
+    private ConfirmationDialog.Option handleRunningAlgorithm(){
+        Thread algThread = getAlgorithmThread();
+        if(algThread != null && algThread.isAlive()){
+            ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
+            dialog.show(applicationTemplate.manager.getPropertyValue(CONTINUE_LABEL.name()),
+                    applicationTemplate.manager.getPropertyValue(CONTINUE_WHILE_RUNNING_WARNING.name()));
+
+            return dialog.getSelectedOption();
+        }
+
+        return ConfirmationDialog.Option.CANCEL;
+    }
+
     /**
      * This helper method verifies that the user really wants to save their unsaved work, which they might not want to
      * do. The user will be presented with three options:
@@ -162,18 +209,14 @@ public final class AppActions implements ActionComponent {
      *
      * @return <code>false</code> if the user presses the <i>cancel</i>, and <code>true</code> otherwise.
      */
-    private boolean promptToSave() /*throws IOException*/ {
+    private ConfirmationDialog.Option promptToSave() /*throws IOException*/ {
 
         PropertyManager manager = applicationTemplate.manager;
         ConfirmationDialog dialog = (ConfirmationDialog) applicationTemplate.getDialog(Dialog.DialogType.CONFIRMATION);
         dialog.show(manager.getPropertyValue(SAVE_UNSAVED_WORK_TITLE.name()),
                 manager.getPropertyValue(SAVE_UNSAVED_WORK.name()));
 
-        if(dialog.getSelectedOption().equals(ConfirmationDialog.Option.YES)){
-            handleSaveRequest();
-            return true;
-        }
-        else return dialog.getSelectedOption().equals(ConfirmationDialog.Option.NO);
+        return dialog.getSelectedOption();
 
     }
 

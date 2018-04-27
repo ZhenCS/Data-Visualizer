@@ -144,7 +144,8 @@ public final class AppUI extends UITemplate {
         getPrimaryScene().getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
 
         NumberAxis      xAxis   = new NumberAxis();
-        NumberAxis      yAxis   = new NumberAxis(0, 60, 10);
+        NumberAxis      yAxis   = new NumberAxis();
+
         xAxis.setAnimated(false);
         yAxis.setAnimated(false);
 
@@ -209,8 +210,8 @@ public final class AppUI extends UITemplate {
         leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, metaDataBox, algorithmBox, algorithmSelection, algorithmButtons);
 
         StackPane rightPanel = new StackPane(chart);
-        rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.69);
-        rightPanel.setMinSize(windowWidth * 0.69, windowHeight * 0.69);
+        rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.80);
+        rightPanel.setMinSize(windowWidth * 0.69, windowHeight * 0.80);
         StackPane.setAlignment(rightPanel, Pos.CENTER);
 
         workspace = new HBox(leftPanel, rightPanel);
@@ -287,13 +288,12 @@ public final class AppUI extends UITemplate {
             selectedAlgorithm.setDataSet(DataSet.fromTSDString(textArea.getText()));
 
             Thread algorithmThread = ((AppAlgorithm)((DataVisualizer) applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
-
             ((RandomClassifier) selectedAlgorithm).setEmpty(true);
             if( algorithmThread == null || !algorithmThread.isAlive()){
                 ((DataVisualizer) applicationTemplate).getAlgorithmComponent().run(selectedAlgorithm);
             }
-            /*TODO show screenshot button after each iteration + end of algorithm
-                show confirmation dialog when user exits but theres new data*/
+
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized (selectedAlgorithm){
                 selectedAlgorithm.notifyAll();
             }
@@ -301,6 +301,9 @@ public final class AppUI extends UITemplate {
             editButton.setVisible(false);
             stopButton.setDisable(false);
             stopButton.setVisible(true);
+            scrnshotButton.setDisable(true);
+            //disableToolBarButtons(true);
+
             if(!selectedAlgorithm.getToContinue()){
                 displayNonContinuousButtons();
                 runButton.setDisable(true);
@@ -311,15 +314,20 @@ public final class AppUI extends UITemplate {
 
         stopButton.setOnAction(event -> {
             ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).endThreads();
-
+            scrnshotButton.setDisable(false);
             editButton.setVisible(true);
             displayRunButton();
         });
     }
 
-    public void displayNonContinuousButtons(){
+    private void displayNonContinuousButtons(){
         runStop.getChildren().clear();
         runStop.getChildren().add(runButton);
+        runStop.getChildren().add(stopButton);
+    }
+
+    private void displayStopButton(){
+        runStop.getChildren().clear();
         runStop.getChildren().add(stopButton);
     }
 
@@ -328,26 +336,9 @@ public final class AppUI extends UITemplate {
         runStop.getChildren().add(runButton);
     }
 
-    public void displayStopButton(){
-        runStop.getChildren().clear();
-        runStop.getChildren().add(stopButton);
-    }
-
-    public boolean isDisplayable(){
-        applicationTemplate.getDataComponent().clear();
-        chart.getData().removeAll(chart.getData());
-
-        String data = textArea.getText().trim();
-        String bufferText = ((AppData) applicationTemplate.getDataComponent()).getBufferTextArea();
-        if (bufferText != null)
-            data += "\n" + bufferText;
-
-        return ((AppData) applicationTemplate.getDataComponent()).loadData(data);
-    }
-
     private void toggleAlgorithm(){
         if(hasNewText) {
-            if (isDisplayable()) {
+            if (((AppData) applicationTemplate.getDataComponent()).hasNoErrors()) {
                 ((AppData) applicationTemplate.getDataComponent()).createAverageLine();
                 ((AppData) applicationTemplate.getDataComponent()).displayData();
                 ((AppData) applicationTemplate.getDataComponent()).addClassification();
@@ -392,15 +383,25 @@ public final class AppUI extends UITemplate {
 
     public void setHasNewText(boolean b){ hasNewText = b; }
 
+    public boolean getHasNewText() { return hasNewText; }
+
     public void disableAppUIButtons(boolean b){
         disableSaveButton(b);
         disableNewButton(b);
     }
+
+    /*public void disableToolBarButtons(boolean b){
+        disableNewButton(b);
+        disableScreenshotButton(b);
+        disableLoadButton(b);
+    }*/
     public void disableRunButton(boolean b) { runButton.setDisable(b); }
 
     public void disableSaveButton(boolean b){ saveButton.setDisable(b); }
 
     public void disableNewButton(boolean b){ newButton.setDisable(b); }
+
+    //public void disableLoadButton(boolean b) { loadButton.setDisable(b); }
 
     public void disableScreenshotButton(boolean b){ scrnshotButton.setDisable(b); }
 

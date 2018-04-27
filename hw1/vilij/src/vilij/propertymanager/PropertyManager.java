@@ -22,20 +22,20 @@ public class PropertyManager {
 
     private static PropertyManager propertyManager = null;
 
-    private Map<String, String>       properties;
-    private Map<String, List<String>> propertyOptions;
+    private final Map<String, String>       properties;
+    private final Map<String, List<String>> propertyOptions;
 
     // Constants required to load the elements and their properties from the XML properties file
-    public static final String PROPERTY_ELEMENT              = "property";
-    public static final String PROPERTY_LIST_ELEMENT         = "property_list";
-    public static final String PROPERTY_OPTIONS_LIST_ELEMENT = "property_options_list";
-    public static final String PROPERTY_OPTIONS_ELEMENT      = "property_options";
-    public static final String OPTION_ELEMENT                = "option";
-    public static final String NAME_ATTRIBUTE                = "name";
-    public static final String VALUE_ATTRIBUTE               = "value";
+    private static final String PROPERTY_ELEMENT              = "property";
+    private static final String PROPERTY_LIST_ELEMENT         = "property_list";
+    private static final String PROPERTY_OPTIONS_LIST_ELEMENT = "property_options_list";
+    private static final String PROPERTY_OPTIONS_ELEMENT      = "property_options";
+    private static final String OPTION_ELEMENT                = "option";
+    private static final String NAME_ATTRIBUTE                = "name";
+    private static final String VALUE_ATTRIBUTE               = "value";
 
     /** Path of the properties resource folder, relative to the root resource folder for the application */
-    public static final String PROPERTIES_RESOURCE_RELATIVE_PATH = "properties";
+    private static final String PROPERTIES_RESOURCE_RELATIVE_PATH = "properties";
 
     private PropertyManager() {
         properties = new HashMap<>();
