@@ -42,8 +42,8 @@ public class AppData implements DataComponent {
         this.applicationTemplate = applicationTemplate;
     }
 
+    public TSDProcessor getProcessor() {return processor;}
     public String getBufferTextArea(){ return bufferTextArea; }
-
     public void setBufferTextArea(String text){ bufferTextArea = text; }
 
     @Override
@@ -106,13 +106,12 @@ public class AppData implements DataComponent {
             processor.processString(dataString);
             Path dataFilePath = ((AppActions)applicationTemplate.getActionComponent()).getDataFilePath();
             processor.setMetaData(dataString);
-            if(dataFilePath != null){
+            if(dataFilePath.toFile().exists()){
                 Path p = Paths.get(System.getProperty("user.dir"));
                 TSDProcessor.MetaDataBuilder.getMetaDataBuilder().setSource(p.relativize(dataFilePath).toString());
             }
             ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().build());
             ((AppAlgorithm)((DataVisualizer) applicationTemplate).getAlgorithmComponent()).updateAlgorithmData();
-            ((AppUI)applicationTemplate.getUIComponent()).refreshAlgorithms();
             return true;
 
         } catch (Exception e) {
@@ -151,8 +150,6 @@ public class AppData implements DataComponent {
         }catch (Exception e) {
             showCorrectDialog(e);
         }
-
-        ((AppUI)applicationTemplate.getUIComponent()).disableSaveButton(true);
     }
 
     private void showCorrectDialog(Exception e){

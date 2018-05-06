@@ -26,21 +26,24 @@ import java.util.stream.Stream;
  */
 public final class TSDProcessor {
 
+    public static class TSDException extends Exception {
+        TSDException(String name){super(name);}
+    }
 
-    static class InvalidDataNameException extends Exception {
+    public static class InvalidDataNameException extends TSDException {
         private static final String NAME_ERROR_MSG = "All data instance names must start with the @ character.";
         InvalidDataNameException(String name) {
             super(String.format("Invalid name '%s'." + NAME_ERROR_MSG, name));
         }
     }
 
-    static class DuplicateNameException extends Exception {
+    public static class DuplicateNameException extends TSDException {
         DuplicateNameException(String name) {
             super(String.format("Duplicate name '%s'.", name));
         }
     }
 
-    static class FormatException extends Exception {
+    public static class FormatException extends TSDException {
         FormatException(int line) {
             super(String.format("Invalid format at line: '%s'.", line));
         }
@@ -59,13 +62,23 @@ public final class TSDProcessor {
         dataPoints.putAll(set.getLocations());
     }
 
+    public Map<String, Point2D> getDataPoints() {
+        return dataPoints;
+    }
+
+    public Map<String, String> getDataLabels() {
+        return dataLabels;
+    }
+
     /**
      * Processes the data and populated two {@link Map} objects with the data.
      *
      * @param tsdString the input data provided as a single {@link String}
-     * @throws Exception if the input string does not follow the <code>.tsd</code> data format
+     * @throws TSDException if the input string does not follow the <code>.tsd</code> data format
      */
-    public void processString(String tsdString) throws Exception {
+    public void processString(String tsdString) throws TSDException {
+        if(tsdString == null || tsdString.equals("")) return;
+
         AtomicBoolean hadAnError   = new AtomicBoolean(false);
         StringBuilder errorMessage = new StringBuilder();
 
@@ -103,7 +116,7 @@ public final class TSDProcessor {
         }
 
         if (errorMessage.length() > 0)
-            throw new Exception(errorMessage.toString());
+            throw new TSDException(errorMessage.toString());
     }
 
     /**

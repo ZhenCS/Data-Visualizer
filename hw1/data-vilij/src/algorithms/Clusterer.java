@@ -12,7 +12,7 @@ public abstract class Clusterer implements Algorithm {
     final int numberOfClusters;
     int maxIterations;
     int updateInterval;
-    int iteration;
+    private int iteration;
     AtomicBoolean tocontinue;
     AtomicBoolean continuous;
     private AtomicBoolean empty;

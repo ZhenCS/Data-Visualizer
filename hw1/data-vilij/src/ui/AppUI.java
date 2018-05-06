@@ -13,7 +13,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import settings.AppPropertyTypes;
 import vilij.components.Dialog;
@@ -297,6 +296,10 @@ public final class AppUI extends UITemplate {
                 config.setOnAction(e -> ((DataVisualizer) applicationTemplate).getAlgorithmComponent().configAlgorithm(algorithm));
                 setAlgorithmButtons(config, true);
 
+                Thread thread = ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
+                if(thread != null && thread.isAlive())
+                    config.setVisible(false);
+
                 final StackPane space = new StackPane();
                 HBox.setHgrow(space, Priority.ALWAYS);
 
@@ -318,6 +321,7 @@ public final class AppUI extends UITemplate {
             selectedAlgorithm.setEmpty(true);
             if( algorithmThread == null || !algorithmThread.isAlive()){
                 ((DataVisualizer) applicationTemplate).getAlgorithmComponent().run(selectedAlgorithm);
+                refreshAlgorithms();
             }
 
             //noinspection SynchronizationOnLocalVariableOrMethodParameter

@@ -90,11 +90,13 @@ public final class AppActions implements ActionComponent {
             if(file != null){
                 dataFilePath = file.toPath();
                 applicationTemplate.getDataComponent().saveData(dataFilePath);
+                ((AppUI)applicationTemplate.getUIComponent()).disableSaveButton(true);
             }else{
                 dataFilePath = null;
             }
         }else{
             applicationTemplate.getDataComponent().saveData(dataFilePath);
+            ((AppUI)applicationTemplate.getUIComponent()).disableSaveButton(true);
         }
     }
 
@@ -111,6 +113,7 @@ public final class AppActions implements ActionComponent {
         if(file != null){
             dataFilePath = file.toPath();
             applicationTemplate.getDataComponent().loadData(dataFilePath);
+            ((AppUI)applicationTemplate.getUIComponent()).refreshAlgorithms();
         }else{ dataFilePath = null; }
 
     }

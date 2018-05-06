@@ -48,7 +48,7 @@ public class DataSet {
     private final Map<String, Point2D> locations;
 
     /** Creates an empty dataset. */
-    public DataSet() {
+    private DataSet() {
         labels = new HashMap<>();
         locations = new HashMap<>();
     }

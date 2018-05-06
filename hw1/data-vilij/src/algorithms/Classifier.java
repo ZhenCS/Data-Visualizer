@@ -29,7 +29,7 @@ public abstract class Classifier implements Algorithm {
 
     int maxIterations;
     int updateInterval;
-    int iteration;
+    private int iteration;
     AtomicBoolean continuous;
     private AtomicBoolean empty;
 
@@ -64,7 +64,7 @@ public abstract class Classifier implements Algorithm {
     @Override
     public void run(){
         initialize();
-        for (iteration = 1; iteration <= maxIterations; iteration++) {
+        for (iteration = 1; iteration <= maxIterations;) {
             synchronized (this) {
                 while (!empty.get()) {
                     try { wait(); }
@@ -74,11 +74,9 @@ public abstract class Classifier implements Algorithm {
                             return;
                         } } }
                 }
-
                 runAlgorithm(iteration);
                 if(iteration >= maxIterations) break;
                 if (iteration % updateInterval == 0) {
-                    //flush(i);
                     setEmpty(false);
                     notifyAll();
                 }
@@ -90,6 +88,8 @@ public abstract class Classifier implements Algorithm {
                     notifyAll();
                     return;
                 } }
+
+            iteration++;
         }
         synchronized (this){
             setEmpty(false);

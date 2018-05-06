@@ -37,8 +37,7 @@ public class AppAlgorithm implements AlgorithmComponent {
                 if(klass.getSuperclass().equals(Clusterer.class))
                     algorithmList.add((Algorithm) konstructor.newInstance(null, 0, 0, 0, false));
             }
-        } catch (IOException | IllegalAccessException | InvocationTargetException | InstantiationException | ClassNotFoundException e) {
-           return;
+        } catch (IOException | IllegalAccessException | InvocationTargetException | InstantiationException | ClassNotFoundException ignored) {
         }
     }
 
@@ -78,8 +77,7 @@ public class AppAlgorithm implements AlgorithmComponent {
 
                 ((AppUI) applicationTemplate.getUIComponent()).refreshAlgorithms();
 
-            } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-                return;
+            } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | InstantiationException ignored) {
             }
         }
     }
@@ -149,6 +147,7 @@ public class AppAlgorithm implements AlgorithmComponent {
                             ((AppUI)applicationTemplate.getUIComponent()).getEditButton().setVisible(true);
                             ((AppUI) applicationTemplate.getUIComponent()).disableScreenshotButton(false);
                             ((AppUI)applicationTemplate.getUIComponent()).displayRunButton();
+                            ((AppUI)applicationTemplate.getUIComponent()).refreshAlgorithms();
                             ((AppUI) applicationTemplate.getUIComponent()).updateIterationLabel("Ended: " + alg.getClass().getSimpleName()
                                     + "\nIteration: " + alg.getIteration());
                         });
