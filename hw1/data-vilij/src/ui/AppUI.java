@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import settings.AppPropertyTypes;
 import vilij.components.Dialog;
@@ -38,7 +39,7 @@ public final class AppUI extends UITemplate {
 
     /** The application to which this class of actions belongs. */
     private final ApplicationTemplate applicationTemplate;
-    private static final String SEPARATOR = "/";
+    public static final String SEPARATOR = "/";
     @SuppressWarnings("FieldCanBeLocal")
     private Button                      scrnshotButton; // toolbar button to take a screenshot of the data
     private Button                      runButton;
@@ -57,6 +58,8 @@ public final class AppUI extends UITemplate {
     private VBox                        leftPanel;
     private HBox                        runStop;
     private Text                        metaData;
+    private ToggleGroup                 algorithmGroup;
+    private Label                       iterationLabel;
 
     public LineChart<Number, Number> getChart() { return chart; }
 
@@ -119,6 +122,7 @@ public final class AppUI extends UITemplate {
 
     @Override
     public void initialize() {
+        algorithmGroup = new ToggleGroup();
         layout();
         setWorkspaceActions();
 
@@ -148,6 +152,8 @@ public final class AppUI extends UITemplate {
 
         xAxis.setAnimated(false);
         yAxis.setAnimated(false);
+        xAxis.setForceZeroInRange(false);
+        yAxis.setForceZeroInRange(false);
 
         chart = new LineChart<>(xAxis, yAxis);
         chart.setTitle(manager.getPropertyValue(AppPropertyTypes.CHART_TITLE.name()));
@@ -188,6 +194,7 @@ public final class AppUI extends UITemplate {
         HBox algorithmBox = new HBox();
         algorithmTypes = new ComboBox<>();
         algorithmTypes.getItems().add("Clustering");
+        algorithmTypes.getSelectionModel().selectFirst();
         algorithmTypes.setVisible(false);
 
         algorithmSelection = new VBox();
@@ -209,17 +216,29 @@ public final class AppUI extends UITemplate {
         leftPanel.setStyle("-fx-background-color: lightgrey");
         leftPanel.getChildren().addAll(leftPanelTitle, textArea, processButtonsBox, metaDataBox, algorithmBox, algorithmSelection, algorithmButtons);
 
-        StackPane rightPanel = new StackPane(chart);
-        rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.80);
-        rightPanel.setMinSize(windowWidth * 0.69, windowHeight * 0.80);
+        iterationLabel = new Label();
+
+
+        VBox rightPanel = new VBox(chart, iterationLabel);
+        rightPanel.setMaxSize(windowWidth * 0.69, windowHeight * 0.91);
+        rightPanel.setMinSize(windowWidth * 0.69, windowHeight * 0.91);
         StackPane.setAlignment(rightPanel, Pos.CENTER);
+        VBox.setVgrow(chart, Priority.ALWAYS);
+
+        iterationLabel.setStyle("-fx-background-color: white; -fx-padding: 5px; -fx-font-size: 13px");
 
         workspace = new HBox(leftPanel, rightPanel);
+
+
+
+
+
         HBox.setHgrow(workspace, Priority.ALWAYS);
 
         appPane.getChildren().add(workspace);
         VBox.setVgrow(appPane, Priority.ALWAYS);
 
+        showAlgorithmsOfType(AlgorithmTypes.CLUSTERING);
 
     }
 
@@ -239,8 +258,11 @@ public final class AppUI extends UITemplate {
     }
 
     private void showAlgorithmsOfType(AlgorithmTypes type){
+
+        RadioButton selected = (RadioButton) algorithmGroup.getSelectedToggle();
+
         algorithmSelection.getChildren().clear();
-        ToggleGroup aGroup = new ToggleGroup();
+
         runButton.setDisable(true);
         runButton.setVisible(false);
         ArrayList<Algorithm> typeList = ((DataVisualizer) applicationTemplate).getAlgorithmComponent().getAlgorithmOfType(type);
@@ -248,9 +270,16 @@ public final class AppUI extends UITemplate {
             typeList.forEach(algorithm -> {
                 HBox hbox = new HBox();
                 RadioButton radio = new RadioButton(algorithm.getClass().getSimpleName());
-                radio.setToggleGroup(aGroup);
+
+                if(selected != null && selected.getText().equals(algorithm.getClass().getSimpleName())) {
+                    radio.setSelected(true);
+                    runButton.setDisable(false);
+                    runButton.setVisible(true);
+                    ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).setSelectedAlgorithm(algorithm);
+                }
+                radio.setToggleGroup(algorithmGroup);
                 radio.setOnAction(event -> {
-                    if(algorithm.isConfigured()){
+                    if(algorithm.getMaxIterations() > 0){
                         runButton.setDisable(false);
                         ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).setSelectedAlgorithm(algorithm);
                     }else{
@@ -285,10 +314,8 @@ public final class AppUI extends UITemplate {
         runButton.setOnAction(event -> {
             Algorithm selectedAlgorithm = ((AppAlgorithm)((DataVisualizer)applicationTemplate).getAlgorithmComponent()).getSelectedAlgorithm();
 
-            selectedAlgorithm.setDataSet(DataSet.fromTSDString(textArea.getText()));
-
             Thread algorithmThread = ((AppAlgorithm)((DataVisualizer) applicationTemplate).getAlgorithmComponent()).getAlgorithmThread();
-            ((RandomClassifier) selectedAlgorithm).setEmpty(true);
+            selectedAlgorithm.setEmpty(true);
             if( algorithmThread == null || !algorithmThread.isAlive()){
                 ((DataVisualizer) applicationTemplate).getAlgorithmComponent().run(selectedAlgorithm);
             }
@@ -302,9 +329,8 @@ public final class AppUI extends UITemplate {
             stopButton.setDisable(false);
             stopButton.setVisible(true);
             scrnshotButton.setDisable(true);
-            //disableToolBarButtons(true);
 
-            if(!selectedAlgorithm.getToContinue()){
+            if(!selectedAlgorithm.continuous()){
                 displayNonContinuousButtons();
                 runButton.setDisable(true);
             }
@@ -334,6 +360,7 @@ public final class AppUI extends UITemplate {
     public void displayRunButton(){
         runStop.getChildren().clear();
         runStop.getChildren().add(runButton);
+        runButton.setDisable(false);
     }
 
     private void toggleAlgorithm(){
@@ -375,6 +402,8 @@ public final class AppUI extends UITemplate {
         hasNewText = true;
     }
 
+    public void updateIterationLabel(String text) { iterationLabel.setText(text);}
+
     public void toggleTextArea(boolean b){ textArea.setDisable(b); }
 
     public String getText(){ return textArea.getText(); }
@@ -390,18 +419,12 @@ public final class AppUI extends UITemplate {
         disableNewButton(b);
     }
 
-    /*public void disableToolBarButtons(boolean b){
-        disableNewButton(b);
-        disableScreenshotButton(b);
-        disableLoadButton(b);
-    }*/
+
     public void disableRunButton(boolean b) { runButton.setDisable(b); }
 
     public void disableSaveButton(boolean b){ saveButton.setDisable(b); }
 
     public void disableNewButton(boolean b){ newButton.setDisable(b); }
-
-    //public void disableLoadButton(boolean b) { loadButton.setDisable(b); }
 
     public void disableScreenshotButton(boolean b){ scrnshotButton.setDisable(b); }
 
@@ -411,17 +434,4 @@ public final class AppUI extends UITemplate {
 
     public ComboBox<String> getAlgorithmTypes(){ return algorithmTypes; }
 
-    public Button getEditButton() { return editButton; }
-    /*public void disableDoneButton(boolean b){
-        doneButton.setDisable(b);
-    }
-
-    public void disableEditButton(boolean b) {
-        editButton.setDisable(b);
-    }*/
-
-
-    /*public void toggleAlgorithmTypes(boolean b){
-        algorithmTypes.setVisible(b);
-    }*/
-}
+    public Button getEditButton() { return editButton; }}

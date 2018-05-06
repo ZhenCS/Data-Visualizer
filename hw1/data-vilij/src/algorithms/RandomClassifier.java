@@ -18,11 +18,11 @@ public class RandomClassifier extends Classifier {
                             int maxIterations,
                             int updateInterval,
                             boolean tocontinue) {
+        super();
         this.dataset = dataset;
         this.maxIterations = maxIterations;
         this.updateInterval = updateInterval;
-        this.tocontinue = new AtomicBoolean(tocontinue);
-        empty = new AtomicBoolean(true);
+        this.continuous = new AtomicBoolean(tocontinue);
     }
 
 
@@ -33,8 +33,14 @@ public class RandomClassifier extends Classifier {
         int yCoefficient = 10;
         int constant     = RAND.nextInt(11);
 
-        // this is the real output of the classifier
         output = Arrays.asList(xCoefficient, yCoefficient, constant, i);
     }
+
+    @Override
+    protected void initialize() {
+
+    }
+
+
 
 }

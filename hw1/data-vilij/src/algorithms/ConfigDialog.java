@@ -102,14 +102,14 @@ public class ConfigDialog extends Stage {
         text = (alg.getUpdateInterval() <= 0) ? 1 : alg.getUpdateInterval();
         updateIntervalField.setText("" + text);
 
-        if(alg.tocontinue())
+        if(alg.continuous())
             toContinueBox.setSelected(true);
         else
             toContinueBox.setSelected(false);
 
-        if(alg instanceof Cluster){
+        if(alg instanceof Clusterer){
 
-            text = (((Cluster) alg).getClusterNumber() <= 0) ? 1 : ((Cluster) alg).getClusterNumber();
+            text = (((Clusterer) alg).getClusterNumber() <= 0) ? 1 : ((Clusterer) alg).getClusterNumber();
             clusterNumberHBox.setVisible(true);
             clusterNumberField.setText("" + text);
         }

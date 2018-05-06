@@ -76,7 +76,6 @@ public final class AppActions implements ActionComponent {
         ui.toggleLeftPane(true);
         ui.setHasNewText(false);
         ui.editUIUpdate();
-
     }
 
     @Override
@@ -248,13 +247,13 @@ public final class AppActions implements ActionComponent {
         PropertyManager manager = applicationTemplate.manager;
 
         dataFilePath = Paths.get(manager.getPropertyValue(CURRENT_PATH.name()));
-        String dataResourcePath = String.join("/",dataFilePath.toString(), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
-
+        String dataResourcePath = String.join(AppUI.SEPARATOR,dataFilePath.toString(), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
 
         String dataExt = manager.getPropertyValue(DATA_FILE_EXT.name());
         FileChooser fileChooser = new FileChooser();
+        if(new File(dataResourcePath).exists())
+            fileChooser.setInitialDirectory(new File(dataResourcePath));
         fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.LOAD_TOOLTIP.name()));
-        fileChooser.setInitialDirectory(new File(dataResourcePath));
         fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(manager.getPropertyValue(DATA_FILE_EXT_DESC.name()) + " ("+dataExt+")", dataExt));
 
         return fileChooser.showOpenDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
@@ -268,8 +267,9 @@ public final class AppActions implements ActionComponent {
         fileChooser.setTitle(applicationTemplate.manager.getPropertyValue(PropertyTypes.SAVE_WORK_TITLE.name()));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter( dataExt, dataExt));
 
-        String dataResourcePath = String.join("/",manager.getPropertyValue(CURRENT_PATH.name()), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
-        fileChooser.setInitialDirectory(new File(dataResourcePath));
+        String dataResourcePath = String.join(AppUI.SEPARATOR,manager.getPropertyValue(CURRENT_PATH.name()), manager.getPropertyValue(DATA_RESOURCE_PATH.name()));
+        if(new File(dataResourcePath).exists())
+            fileChooser.setInitialDirectory(new File(dataResourcePath));
 
         return fileChooser.showSaveDialog(applicationTemplate.getUIComponent().getPrimaryWindow());
 

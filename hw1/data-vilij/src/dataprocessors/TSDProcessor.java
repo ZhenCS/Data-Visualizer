@@ -1,6 +1,7 @@
 package dataprocessors;
 
 
+import algorithms.DataSet;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.chart.LineChart;
@@ -27,23 +28,19 @@ public final class TSDProcessor {
 
 
     static class InvalidDataNameException extends Exception {
-
         private static final String NAME_ERROR_MSG = "All data instance names must start with the @ character.";
-
         InvalidDataNameException(String name) {
             super(String.format("Invalid name '%s'." + NAME_ERROR_MSG, name));
         }
     }
 
     static class DuplicateNameException extends Exception {
-
         DuplicateNameException(String name) {
             super(String.format("Duplicate name '%s'.", name));
         }
     }
 
     static class FormatException extends Exception {
-
         FormatException(int line) {
             super(String.format("Invalid format at line: '%s'.", line));
         }
@@ -55,6 +52,11 @@ public final class TSDProcessor {
     TSDProcessor() {
         dataLabels = new HashMap<>();
         dataPoints = new HashMap<>();
+    }
+
+    public void setDataSet(DataSet set){
+        dataLabels.putAll(set.getLabels());
+        dataPoints.putAll(set.getLocations());
     }
 
     /**
@@ -130,8 +132,6 @@ public final class TSDProcessor {
         double lowerBoundX = dataPoints.values().stream().mapToDouble(Point2D::getX).min().getAsDouble();
         double upperBoundX = dataPoints.values().stream().mapToDouble(Point2D::getX).max().getAsDouble();
         double upperBoundY = dataPoints.values().stream().mapToDouble(Point2D::getY).max().getAsDouble();
-
-
 
         int divisor = output.get(1);
         if(divisor == 0)

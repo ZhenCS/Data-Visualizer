@@ -9,6 +9,7 @@ functionality within the main workspace. -->
         <property name="DATA_RESOURCE_PATH" value="resources/data"/>
         <property name="GUI_ICONS_RESOURCE_PATH" value="gui/icons"/>
         <property name="CHART_CSS_PATH" value="/css/chart.css"/>
+        <property name="ALGORITHMS_PATH" value="properties/algorithms.tsd"/>
 
         <!-- USER INTERFACE ICON FILES -->
 

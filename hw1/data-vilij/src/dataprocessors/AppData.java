@@ -1,9 +1,12 @@
 package dataprocessors;
 
 import actions.AppActions;
+import algorithms.AppAlgorithm;
+import algorithms.DataSet;
 import javafx.scene.chart.LineChart;
 import settings.AppPropertyTypes;
 import ui.AppUI;
+import ui.DataVisualizer;
 import vilij.components.DataComponent;
 import vilij.components.Dialog;
 import vilij.components.ErrorDialog;
@@ -78,7 +81,6 @@ public class AppData implements DataComponent {
             ui.disableNewButton(false);
             ui.toggleLeftPane(true);
             ui.setHasNewText(false);
-            addClassification();
             loadData(allInstances);
             addClassification();
             ui.doneUIUpdate();
@@ -109,6 +111,8 @@ public class AppData implements DataComponent {
                 TSDProcessor.MetaDataBuilder.getMetaDataBuilder().setSource(p.relativize(dataFilePath).toString());
             }
             ((AppUI)applicationTemplate.getUIComponent()).setMetaDataText(TSDProcessor.MetaDataBuilder.getMetaDataBuilder().build());
+            ((AppAlgorithm)((DataVisualizer) applicationTemplate).getAlgorithmComponent()).updateAlgorithmData();
+            ((AppUI)applicationTemplate.getUIComponent()).refreshAlgorithms();
             return true;
 
         } catch (Exception e) {
@@ -125,6 +129,7 @@ public class AppData implements DataComponent {
         }
         else
             ((AppUI)applicationTemplate.getUIComponent()).getAlgorithmTypes().getItems().remove("Classification");
+
     }
 
     @Override
@@ -177,7 +182,7 @@ public class AppData implements DataComponent {
         return ((AppData) applicationTemplate.getDataComponent()).loadData(data);
     }
 
-    private String getAllDataText(){
+    public String getAllDataText(){
         String data = ((AppUI)applicationTemplate.getUIComponent()).getText().trim();
         if (bufferTextArea != null)
             data += "\n" + bufferTextArea;
@@ -202,5 +207,13 @@ public class AppData implements DataComponent {
 
     public void classify(List<Integer> output){
         processor.createLine(((AppUI) applicationTemplate.getUIComponent()).getChart(), applicationTemplate.manager.getPropertyValue(CLASSIFIER_LINE.name()), output);
+    }
+
+    public void clusterize(DataSet set){
+        clear();
+        ((AppUI)applicationTemplate.getUIComponent()).getChart().getData().clear();
+        processor.setDataSet(set);
+        createAverageLine();
+        displayData();
     }
 }

@@ -5,6 +5,8 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * uses output to update the visualizer
+ *
  * An abstract class for classification algorithms. The output
  * for these algorithms is a straight line, as described in
  * Appendix C of the software requirements specification
@@ -23,40 +25,31 @@ public abstract class Classifier implements Algorithm {
      */
     static final Random RAND = new Random();
     List<Integer> output;
-    private boolean isConfigured;
     DataSet dataset;
 
     int maxIterations;
     int updateInterval;
-    AtomicBoolean tocontinue;
-    AtomicBoolean empty;
+    int iteration;
+    AtomicBoolean continuous;
+    private AtomicBoolean empty;
 
+    public Classifier(){
+        empty = new AtomicBoolean(true);
+    }
+
+    public int getIteration() { return iteration; }
     public List<Integer> getOutput() { return output; }
-    @Override
-    public boolean isConfigured() { return isConfigured;}
-    @Override
-    public void setIsConfigured() { isConfigured = true;}
     @Override
     public int getMaxIterations() { return maxIterations; }
     @Override
     public int getUpdateInterval() { return updateInterval;}
     @Override
-    public boolean tocontinue() { return tocontinue.get(); }
+    public boolean continuous() {return continuous.get(); }
     @Override
-    public void setMaxIterations(int iterations) { maxIterations = iterations; }
-    @Override
-    public void setUpdateInterval(int interval) { updateInterval = interval; }
-    @Override
-    public void setToContinue(boolean toContinue) { this.tocontinue = new AtomicBoolean(toContinue); }
-    @Override
-    public boolean getToContinue() { return tocontinue.get(); }
-    @Override
-    public void setDataSet(DataSet set) { dataset = set; }
-
     public AtomicBoolean getEmpty() { return empty;}
-
-    public void setEmpty() { empty = null;}
-
+    @Override
+    public void setEmptyNull() { empty = null;}
+    @Override
     public void setEmpty(boolean b) {
         if(empty == null)
             empty = new AtomicBoolean();
@@ -65,14 +58,13 @@ public abstract class Classifier implements Algorithm {
     }
 
 
-
-
     //Return boolean, true to update chart
     protected abstract void runAlgorithm(int i);
-
+    protected  abstract void initialize();
     @Override
     public void run(){
-        for (int i = 1; i <= maxIterations; i++) {
+        initialize();
+        for (iteration = 1; iteration <= maxIterations; iteration++) {
             synchronized (this) {
                 while (!empty.get()) {
                     try { wait(); }
@@ -83,16 +75,12 @@ public abstract class Classifier implements Algorithm {
                         } } }
                 }
 
-                runAlgorithm(i);
-                if(i >= maxIterations) break;
-                if (i % updateInterval == 0) {
+                runAlgorithm(iteration);
+                if(iteration >= maxIterations) break;
+                if (iteration % updateInterval == 0) {
                     //flush(i);
                     setEmpty(false);
                     notifyAll();
-                }
-                if (i > maxIterations * .6 && RAND.nextDouble() < 0.05) {
-                    //flush(i);
-                    break;
                 }
             }
 
