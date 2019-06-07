@@ -17,3 +17,5 @@ In the config,
   Continuous Run: automatically goes to the next iteration. If unchecked, user must manually press go to continue to the next iteration.
 
 Press the green button to run the algorithm.
+
+This program was made for CSE 219: Computer Science III
