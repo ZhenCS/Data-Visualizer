@@ -106,7 +106,7 @@ public class AppData implements DataComponent {
             processor.processString(dataString);
             Path dataFilePath = ((AppActions)applicationTemplate.getActionComponent()).getDataFilePath();
             processor.setMetaData(dataString);
-            if(dataFilePath.toFile().exists()){
+            if(dataFilePath != null && dataFilePath.toFile().exists()){
                 Path p = Paths.get(System.getProperty("user.dir"));
                 TSDProcessor.MetaDataBuilder.getMetaDataBuilder().setSource(p.relativize(dataFilePath).toString());
             }
@@ -175,7 +175,6 @@ public class AppData implements DataComponent {
         chart.getData().removeAll(chart.getData());
 
         String data = getAllDataText();
-
         return ((AppData) applicationTemplate.getDataComponent()).loadData(data);
     }
 

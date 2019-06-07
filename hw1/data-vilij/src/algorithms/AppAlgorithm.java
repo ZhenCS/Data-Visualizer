@@ -72,7 +72,8 @@ public class AppAlgorithm implements AlgorithmComponent {
                 if(alg instanceof Clusterer)
                     algorithm = (Algorithm) konstructor.newInstance(DataSet.fromTSDString(data), config.getMaxIterations(), config.getUpdateInterval(), config.getClusterNumber(), config.getToContinue());
 
-                algorithmList.set(algorithmList.indexOf(alg), algorithm);
+                //algorithmList.set(algorithmList.indexOf(alg), algorithm);
+                replaceAlgorithm(alg, algorithm);
                 setSelectedAlgorithm(algorithm);
 
                 ((AppUI) applicationTemplate.getUIComponent()).refreshAlgorithms();
@@ -80,6 +81,19 @@ public class AppAlgorithm implements AlgorithmComponent {
             } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | InstantiationException ignored) {
             }
         }
+    }
+
+    private void replaceAlgorithm(Algorithm alg, Algorithm algorithm){
+        int index = -1;
+
+        for(int i = 0; i < algorithmList.size(); i++){
+            if(algorithmList.get(i).getClass().getSimpleName().equals(alg.getClass().getSimpleName())){
+                index = i;
+            }
+        }
+
+        if(index < 0) return;
+        algorithmList.set(index, algorithm);
     }
 
     public void updateAlgorithmData(){
@@ -95,7 +109,8 @@ public class AppAlgorithm implements AlgorithmComponent {
             } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
                 return;
             }
-            algorithmList.set(algorithmList.indexOf(alg), algorithm);
+            //algorithmList.set(algorithmList.indexOf(alg), algorithm);
+            replaceAlgorithm(alg, algorithm);
         });
     }
 
