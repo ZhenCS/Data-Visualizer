@@ -2,7 +2,7 @@
 
 Display data points onto a graph and categorizing them into groups.
 
-To run: run DataVisualizer
+To run: run DataVisualizer.java in an IDE
 
 This program uses .tsd files. Each data point in a .tsd file has: @name label x,y. (tab seperated).
 Import a sample .tsd file from resources/data or add your own data points.
@@ -18,4 +18,4 @@ In the config,
 
 Press the green button to run the algorithm.
 
-This program was made for CSE 219: Computer Science III
+This program was made for CSE 219: Computer Science III with Professor Ritwik Banerjee
